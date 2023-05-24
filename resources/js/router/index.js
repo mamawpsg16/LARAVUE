@@ -7,7 +7,7 @@ import TaskIndex from '../views/Task/Index.vue'
 import TaskCreate from '../views/Task/Create.vue'
 import TaskShow from '../views/Task/Show.vue'
 import TaskEdit from '../views/Task/Edit.vue'
-
+import Profile from '../views/Authentication/Profile.vue'
 const routes = [
   {
     path: '/:catchAll(.*)', // Match any route that is not defined
@@ -23,12 +23,13 @@ const routes = [
   {
     path: '/register',
     name: 'register',
-    component: Register
+    component: Register,
   },
   {
     path: '/login',
     name: 'login',
-    component: Login
+    component: Login,
+    meta: { requiresGuest: true }
   },
   {
     path: '/tasks',
@@ -54,6 +55,12 @@ const routes = [
     component: TaskEdit,
     meta: { requiresAuth: true }
   },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: Profile,
+    meta: { requiresAuth: true }
+  }
 
 ];
 

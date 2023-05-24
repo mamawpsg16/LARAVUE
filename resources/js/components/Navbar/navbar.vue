@@ -1,33 +1,30 @@
 <template>
-    <div>
-        <router-link to="/login">Login</router-link> ||
-        <router-link to="/register">Register</router-link> ||
-
-        <router-link to="/tasks">Tasks</router-link> ||
-        <router-link to="/login" @click="logout">Logout</router-link>
-    </div>
+    <nav class="bg-gray-900">
+        <div
+            class="container mx-auto px-4 flex items-center justify-between h-16"
+        >
+            <router-link to="/" class="text-white font-semibold text-xl"
+                >Logo</router-link
+            >
+            <component :is="isAuthenticated ? authenticated : guest"></component>
+        </div>
+    </nav>
 </template>
 
 <script setup>
+import { ref, onMounted  } from "vue";
+import authenticated from "./authenticated.vue";
+import guest from "./guest.vue";
 import auth from "../../Utils/auth.js";
-const logout = function () {
-    auth.logout()
-        .then((response) => {
-            if(response.success){
-                router.push({ name: "login" });
-            }
-            // Handle successful logout, such as redirecting to the login page
-        })
-        .catch((error) => {
-            console.log(error,'DITO NGA');
-            // Handle logout error
-            console.error(error);
-        });
-};
-</script>
+const isAuthenticated = ref(false);
 
-<style scoped>
-/* .shit{
-    color:green;
-} */
-</style>
+onMounted(async () => {
+    try {
+        isAuthenticated.value = await auth.isUserAuthenticated();
+    } catch (error) {
+        isAuthenticated = false;
+    }
+});
+
+
+</script>

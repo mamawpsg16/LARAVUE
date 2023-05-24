@@ -10,60 +10,76 @@ import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 // import Loading from './Utils/loading.js';
 import auth from './Utils/auth.js';
-
-
+import { createPinia } from 'pinia'
+const pinia = createPinia()
+// import { getCookie, setCookie, deleteCookie } from './Utils/cookie.js'
+import { setItem, getItem, removeItem } from './Utils/localStorage.js'
+import 'vue-multiselect/dist/vue-multiselect.css'
+import 'vue-datepicker-next/index.css';
+import Navbar from './components/Navbar/navbar.vue'
 
 const app = createApp(App);
-// app.component('Loading', Loading);
-// const loading = ref(false);
+app.use(pinia)
+app.component('Navbar', Navbar);
+
+app.provide('$localStorage', {
+  setItem,
+  getItem,
+  removeItem
+});
+
+// app.config.globalProperties.$cookie = {
+//     getCookie,
+//     setCookie
+// };
 
 app.config.globalProperties.$date = {
     dateFormat,
     humanReadable,
 };
+
 // app.config.globalProperties.$showToast = showCustomToast;
 
 NProgress.configure({ easing: 'ease', speed: 400,  showSpinner: false });
 
 
-// router.beforeResolve((to, from, next) => {
-//   if (to.name) {
-//     // loading.value = true;
-//     NProgress.start().set(0.4);
-//   }
-//   next();
-// });
-router.beforeEach(async (to, from, next) => {
-    if (to.matched.some(record => record.meta.requiresAuth)) {
-      // Check if the user is authenticated
-      try {
-        await auth.checkAuth();
-        next(); // User is authenticated, proceed to the route
-      } catch (error) {
-        next('/login'); // User is not authenticated, redirect to the login page
-      }
-    } else {
-      next(); // Route does not require authentication, proceed to the route
-    }
-});
 router.beforeEach(async (to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    // Check if the user is authenticated
-    if (to.name === 'login') {
-      next(); // Skip authentication check for the login route
-    } else {
-      try {
-        await auth.checkAuth();
-        next(); // User is authenticated, proceed to the route
-      } catch (error) {
-        next('/login'); // User is not authenticated, redirect to the login page
+    try {
+      let isUserAuthenticated = await auth.isUserAuthenticated();
+      console.log(isUserAuthenticated,'YES YES YOW');
+      if (!isUserAuthenticated) {  
+        next('/login'); // User is authenticated, redirect to the dashboard or any other authenticated route
+        console.log('DASHBOARD');
+      } else {
+        next(); // User is not authenticated, proceed to the route
       }
+    } catch (error) {
+      console.log(error);
+      next('/login'); // User is not authenticated, redirect to the login page
     }
-  } else {
-    next(); // Route does not require authentication, proceed to the route
+  } else if (to.matched.some(record => record.meta.requiresGuest)) {
+    console.log('GUEST')
+    try {
+      let isUserAuthenticated = await auth.isUserAuthenticated();
+      if (isUserAuthenticated) {
+        next('/'); // User is authenticated, redirect to the dashboard or any other authenticated route
+        console.log('DASHBOARD');
+      } else {
+        next(); // User is not authenticated, proceed to the route
+      }
+    } catch (error) {
+      console.log('ERROR');
+      next(); // Handle error and proceed to the route
+    }
+  }else{
+    next(); 
   }
+  
   NProgress.set(0.4);
 });
+
+
 
 
 router.afterEach((to, from) => {

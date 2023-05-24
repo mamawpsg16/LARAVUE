@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuthenticationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,12 +33,16 @@ Route::post('/login',[AuthenticationController::class, 'authenticate'])->name(' 
 //     return $request->user();
 // });
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
-        echo 'SHEEESH';
-        return $request->user();
-    });
+// Route::middleware('auth:sanctum')->group(function () {
+//     Route::get('/user', function (Request $request) {
+//         echo 'SHEEESH';
+//         return $request->user();
+//     });
    
-    Route::apiResource('tasks', TaskController::class);
-    Route::post('/logout',[AuthenticationController::class, 'logout'])->name(' logout');
-});
+// });
+Route::apiResource('tasks', TaskController::class);
+Route::get('/users',[UserController::class,'getUsers']);
+Route::get('/profile',[AuthenticationController::class,'me']);
+Route::post('/profile',[ProfileController::class,'update']);
+Route::post('/updateTaskStatus',[TaskController::class,'updateTaskStatus']);
+Route::post('/logout',[AuthenticationController::class, 'logout'])->name(' logout');

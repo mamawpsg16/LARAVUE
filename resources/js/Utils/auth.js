@@ -1,34 +1,39 @@
-import axios from 'axios';
-
-const apiClient = axios.create({
-  withCredentials: true, // important for Sanctum CSRF protection
-});
-
+import { getItem } from "./localStorage.js";
 export default {
-  checkAuth() {
-    const token = localStorage.getItem('bearer_token'); // Retrieve the bearer token from storage
-    if (token) {
-      apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      return apiClient.get('/api/user');
-    } else {
-      return Promise.reject(new Error('Bearer token not available'));
-    }
-  },
-  logout() {
-    // Get the bearer token from local storage
-    const bearerToken = localStorage.getItem('bearer_token');
-    console.log(bearerToken);
-    // Clear the bearer token from local storage
-    localStorage.removeItem('bearer_token');
+    getAuth: async function () {
+        return {
+            user_id: getItem("user_id"),
+            access_token: getItem("access_token"),
+        };
+    },
 
-    // Remove the bearer token from the default headers
-    delete apiClient.defaults.headers.common['Authorization'];
+    isUserAuthenticated: async function() {
+        try {
+          const user_id = getItem("user_id");
+          const access_token = getItem("access_token");
+      
+          if (user_id && access_token) {
+            // Check token expiration if necessary
+            // Example: const isTokenExpired = checkTokenExpiration(access_token);
+            //         if (isTokenExpired) return false;
+      
+            return true;
+          }
+      
+          return false;
+        } catch (error) {
+          console.error(error);
+          return false;
+        }
+      }
+      
 
-    // Optional: Make a request to the backend to revoke the access token
-    return apiClient.post('/api/logout', null, {
-      headers: {
-        Authorization: `Bearer ${bearerToken}`,
-      },
-    });
-  }
+    // logout: async function(){
+    //     let user_id = getCookie("user_id");
+    //     let logout = await axios.post('/api/logout',{ id: user_id});
+    //     return false;
+    //     deleteCookie('user_id');
+    //     deleteCookie('access_token');
+    //     return logout;
+    // }
 };

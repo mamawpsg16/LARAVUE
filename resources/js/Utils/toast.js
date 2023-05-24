@@ -7,7 +7,8 @@ export const showCustomToast = (type, message, options = {}) => {
       limit: 2,
       pauseOnHover: false,
       pauseOnFocusLoss: false,
-      pauseOnBodyClick: false
+      pauseOnBodyClick: false,
+      position: toast.POSITION.BOTTOM_RIGHT
     };
   
     const mergedOptions = { ...defaultOptions, ...options };

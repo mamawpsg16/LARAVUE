@@ -35,6 +35,7 @@ class StoreTaskRequest extends FormRequest
             'title' => ['required', 'max:100', 'unique:tasks'],
             'description' => ['required', 'max:255'],
             'due_date' => 'required',
+            'user_id' => ['sometimes']
         ];
     }
 }
