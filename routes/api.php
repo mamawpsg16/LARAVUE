@@ -1,11 +1,15 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\ModuleController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Auth\SocialController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Auth\AuthenticationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,8 +44,18 @@ Route::post('/login',[AuthenticationController::class, 'authenticate'])->name(' 
 //     });
    
 // });
+Route::get('notifications',[NotificationController::class,'index']);
+Route::get('unread-notifications',[NotificationController::class,'unreadNotifications']);
+Route::post('markAsRead',[NotificationController::class,'markAsRead']);
+Route::post('markAllAsRead',[NotificationController::class,'markAllAsRead']);
+
+Route::get('/modules',[ModuleController::class,'index']);
+
+Route::get('/login/{provider}', [SocialController::class,'redirectToProvider']);
+Route::get('/login/{provider}/callback', [SocialController::class,'handleProviderCallback']);
 Route::apiResource('tasks', TaskController::class);
 Route::get('/users',[UserController::class,'getUsers']);
+Route::get('/dashboard',DashboardController::class);
 Route::get('/profile',[AuthenticationController::class,'me']);
 Route::post('/profile',[ProfileController::class,'update']);
 Route::post('/updateTaskStatus',[TaskController::class,'updateTaskStatus']);

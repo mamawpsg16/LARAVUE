@@ -4,7 +4,7 @@
     <div class="w-1/2">
       <h2 class="text-center text-2xl font-bold mb-4">REGISTER</h2>
       <p v-if="isRegistered" class="text-center text-green-500">{{ success_message }}</p>
-      <Form>
+      <Form @submit.prevent="register">
         <div class="mb-4">
           <Label label="Username" />
           <Input
@@ -49,8 +49,7 @@
         </div>
         <div class="flex justify-end">
           <button
-            type="button"
-            @click.prevent="register"
+            type="submit"
             class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
           >
             Register
@@ -91,8 +90,7 @@ const increment = () => count.value++;
 const decrement = () => (count.value > 0 ? count.value-- : count.value);
 
 const register = () => {
-  axios
-    .post("/api/register", user_account)
+    axios.post("/api/register", user_account)
     .then((response) => {
       // Check if the response contains success message
       const { success } = response.data;
@@ -104,14 +102,12 @@ const register = () => {
       }
     })
     .catch((error) => {
-      console.log(error.response);
       // Handle request error
       if (error.response?.status === 422) {
         // Handle validation errors
         errors.value = error.response.data.errors;
       } else {
         // Handle other errors
-        console.log(error);
       }
     });
 };

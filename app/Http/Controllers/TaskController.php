@@ -8,8 +8,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use App\Http\Requests\StoreTaskRequest;
+use App\Notifications\TaskNotification;
 use App\Http\Requests\UpdateTaskRequest;
-use App\Jobs\SendTaskAssignedNotification;
 
 class TaskController extends Controller
 {
@@ -20,24 +20,25 @@ class TaskController extends Controller
      */
     public function index(Request $request)
     {
+        // dd($request->query('sort'));
         $user_id = Crypt::decryptString($request->query('user_id'));
         $user = User::where('id',$user_id)->first();
         // dd($user->email);
         $query = Task::query();
 
         // Filtering logic
-        $filter = $request->query('filter');
-        if($filter != 'all'){
-            $query->where('status', $filter );
-        }
+        // $filter = $request->query('filter');
+        // if($filter != 'all'){
+        //     $query->where('status', $filter );
+        // }
         
-        // Sorting logic
+        // // Sorting logic
         $sortBy = $request->query('sortBy');
         if($sortBy != 'default'){
             if ($sortBy === 'due_date') {
-                $query->orderBy('due_date');
+                $query->orderBy('due_date',$request->query('sort'));
             } elseif ($sortBy === 'title') {
-                $query->orderBy('title');
+                $query->orderBy('title',$request->query('sort'));
             }
         }
         if($user->email != 'kevinmensah114@gmail.com'){
@@ -63,7 +64,7 @@ class TaskController extends Controller
         ]);
         if($request->input('user_id')){
             $assignedUser = User::find($request->input('user_id'));
-            SendTaskAssignedNotification::dispatch($assignedUser, $task)->onQueue('notifications');
+            $assignedUser->notify(new TaskNotification($task));
         }
 
         return response()->json($task, 200);
@@ -84,6 +85,7 @@ class TaskController extends Controller
 
     public function update(UpdateTaskRequest $request, Task $task)
     {
+        // dd($request->input('user_id'));
 
         $task->update([
             'title' => $request->input('title'),
@@ -94,8 +96,8 @@ class TaskController extends Controller
 
         if($request->input('user_id')){
             $assignedUser = User::find( $request->input('user_id'));
+            $assignedUser->notify(new TaskNotification($task));
     
-            SendTaskAssignedNotification::dispatch($assignedUser, $task)->onQueue('notifications');
         }
 
         return response()->json($task);

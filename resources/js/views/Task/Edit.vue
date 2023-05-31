@@ -2,13 +2,13 @@
     <Navbar />
     <form class="container mx-auto w-3/6 h-full mt-2">
         <div
-            v-show="selected_user.profile_picture"
+            v-show="selected_user?.profile_picture"
             class="flex items-center justify-center"
         >
             <div class="flex flex-col">
                 <div class="w-40 h-40 rounded-full overflow-hidden">
                     <img
-                        :src="selected_user.profile_picture"
+                        :src="selected_user?.profile_picture"
                         alt="Profile Picture"
                         class="object-cover w-full h-full"
                     />
@@ -72,7 +72,7 @@
                     style="
                         width: 100%;
                         height: 2.5rem;
-                        margin-top: 0.25rem;
+                        margin-top: 0.25rem;                       
                         border-radius: 0.375rem;
                     "
                 ></date-picker>
@@ -154,6 +154,7 @@ const selectAssignedUser = function (selectedOption, id) {
 
 const removeAssignedUser = function (removedOption, id) {
     selected_user.value = [];
+    user_id.value = null;
 };
 
 const update = () => {
@@ -166,7 +167,7 @@ const update = () => {
             {
                 title: task.value.title,
                 description: task.value.description,
-                due_date: new Date(task.value.due_date).toDateString(),
+                due_date: task.value.due_date ? new Date(task.value.due_date).toDateString() : null ,
                 user_id: user_id.value,
             },
             {

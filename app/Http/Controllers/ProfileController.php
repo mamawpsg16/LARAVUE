@@ -51,18 +51,18 @@ class ProfileController extends Controller
     {
         // dd(date('Y-m-d',strtotime($request->birth_date)));
         // dd($request->all());
-        
+        // dd($request->birth_date != 'null' ? date('Y-m-d',strtotime($request->birth_date)) : null);
+        // dd(!empty($request->about) ? $request->about : null);
         $user = auth()->user();
         $request->validate([
             'username' => 'required',
             'email' => 'required|email',
             'profile_picture' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-
         $user->username = $request->username;
         $user->email = $request->email;
-        $user->about = $request->about;
-        $user->birth_date = date('Y-m-d',strtotime($request->birth_date));
+        $user->about = !blank($request->about) ? $request->about : '...';
+        $user->birth_date = $request->birth_date != 'null' ? date('Y-m-d',strtotime($request->birth_date)) : null;
 
         if ($request->hasFile('profile_picture')) {
             $image = $request->file('profile_picture');

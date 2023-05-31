@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use App\Http\Requests\StoreRegisterRequest;
-use Illuminate\Support\Facades\Auth;
-// use Laravel\Sanctum\Sanctum;
-use Illuminate\Support\Facades\Crypt;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Http\Controllers\Controller;
+// use Laravel\Sanctum\Sanctum;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
+use App\Http\Requests\StoreRegisterRequest;
 
 
 class AuthenticationController extends Controller
@@ -112,7 +113,12 @@ class AuthenticationController extends Controller
 
     public function me()
     {
-        return response()->json(auth()->user());
+        
+        if ($this->guard()->user()->access_token) {
+            return response()->json($this->guard()->user());
+        }
+        $this->guard()->logout();
+        return response()->json(false);
     }
 
     public function logout(Request $request)

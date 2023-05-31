@@ -74,6 +74,11 @@ class User extends Authenticatable implements JWTSubject
             return asset('storage/defaults/no-profile.png');
         }
     }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
+    }
     // public function getProfilePictureUrl()
     // {
     //     if ($this->image_name) {

@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class TaskAssignedNotification extends Notification
+class TaskNotification extends Notification
 {
     use Queueable;
 
@@ -16,9 +16,9 @@ class TaskAssignedNotification extends Notification
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($task)
     {
-        //
+        $this->task = $task;
     }
 
     /**
@@ -38,13 +38,14 @@ class TaskAssignedNotification extends Notification
      * @param  mixed  $notifiable
      * @return \Illuminate\Notifications\Messages\MailMessage
      */
-    public function toMail($notifiable)
-    {
-        return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
-    }
+    // public function toMail($notifiable)
+    // {
+    //     return (new MailMessage)
+    //                 ->line('The introduction to the notification.')
+    //                 ->action('Notification Action', url('/'))
+    //                 ->line('Thank you for using our application!');
+    // }
+
 
     /**
      * Get the array representation of the notification.
@@ -54,8 +55,12 @@ class TaskAssignedNotification extends Notification
      */
     public function toArray($notifiable)
     {
-        return [
-            //
+    return [
+            'id' => $this->task->id,
+            'title' => $this->task->title,
+            'description' => $this->task->description,
+            'due_date' => $this->task->due_date,
+            'status' => $this->task->status
         ];
     }
 }

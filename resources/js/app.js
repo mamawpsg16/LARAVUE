@@ -1,6 +1,7 @@
 require('./bootstrap');
 
 import { createApp } from 'vue';
+import '@fortawesome/fontawesome-free/css/all.css';
 import App from './views/App.vue';
 import router from './router';
 import Toast from 'vue3-toastify';
@@ -17,10 +18,14 @@ import { setItem, getItem, removeItem } from './Utils/localStorage.js'
 import 'vue-multiselect/dist/vue-multiselect.css'
 import 'vue-datepicker-next/index.css';
 import Navbar from './components/Navbar/navbar.vue'
+import Sidebar from './components/Navbar/sidebar.vue'
 
 const app = createApp(App);
+
+
 app.use(pinia)
 app.component('Navbar', Navbar);
+app.component('Sidebar', Sidebar);
 
 app.provide('$localStorage', {
   setItem,

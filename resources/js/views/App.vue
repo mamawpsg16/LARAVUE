@@ -13,8 +13,21 @@
 </template>
 
 <script setup>
-import Navbar from '../components/Navbar/navbar.vue';
+import { onMounted } from 'vue';
+import auth  from '../Utils/auth.js'
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
+const checkAuthentication = function(){
+    const invalidToken = auth.isAccessTokenInvalid();
+    if(invalidToken) {
+        router.push({name:'login'});
+    }
+}
+
+onMounted(() =>{
+  checkAuthentication();
+})
 </script>
 
 <style>

@@ -2,14 +2,16 @@
     <Navbar/>
     <div class="p-4">
         <h1 class="text-2xl font-bold text-center">TASKS</h1>
+       
         <div class="flex justify-between items-center mb-4">
-            <div class="flex">
+            <div class="flex space-x-2">
                 <div class="mt-4 mr-4">
                     <label for="filter" class="mr-2">Filter:</label>
                     <select
                         v-model="filter"
                         id="filter"
                         class="px-2 py-1 border rounded-md"
+                        @change="filterStatus"
                     >
                         <option value="all">All</option>
                         <option value="0">Pending</option>
@@ -31,6 +33,17 @@
                         <option value="due_date">Due Date</option>
                     </select>
                 </div>
+                <div class="mt-4">
+                    <label for="sortBy" class="mr-2">Sort</label>
+                    <select
+                        v-model="sort"
+                        id="sort"
+                        class="px-2 py-1 border rounded-md"
+                    >
+                        <option value="desc">Descending</option>
+                        <option value="asc">Ascending</option>
+                    </select>
+                </div>
             </div>
             <router-link
                 to="/task/create"
@@ -47,6 +60,9 @@
                     />
                 </svg>
             </router-link>
+        </div>
+        <div class="flex justify-end">
+                <p class="text-lg">Count: {{ tasks.length }}</p>
         </div>
         <template v-if="tasks.length">
             <div
@@ -137,6 +153,7 @@
             </div>
         </template>
         <p v-else class="mt-4">No Tasks Yet...</p>
+       
     </div>
 </template>
 
@@ -152,8 +169,9 @@ const router = useRouter();
 const tasks = ref([]);
 const filter = ref("all"); // Default filter option
 const sortBy = ref("default"); // Default sort option
+const sort = ref("desc"); // Default sort option
 const $localStorage = inject("$localStorage");
-
+const all_tasks = ref([]);
 const access_token = localStorage.getItem("bearer_token");
 
 const getTasks = () => {
@@ -161,7 +179,8 @@ const getTasks = () => {
     const user_id = $localStorage.getItem("user_id");
     const url = "/api/tasks";
     const params = {
-        filter: filter.value,
+        // filter: filter.value,
+        sort: sort.value,
         sortBy: sortBy.value,
         user_id: user_id,
     };
@@ -208,6 +227,19 @@ const updateTaskStatus = function (id, status) {
         });
 };
 
+const filterStatus = function (e) {
+    if (all_tasks.value.length === 0) {
+        // Store the original tasks array if it hasn't been stored yet
+        all_tasks.value = tasks.value;
+    }
+    console.log(e.target.value, e.target.value != 'all');
+    if(e.target.value != 'all'){
+      const filtered_tasks = all_tasks.value.filter(task => parseInt(task.status) === parseInt(e.target.value));
+     return tasks.value = filtered_tasks;
+    }
+    tasks.value = all_tasks.value;
+  
+};
 const deleteTask = function (task_id) {
     Swal("Delete Task!", "Are you sure?", "warning", "Yes", {
         showCancelButton: true,
@@ -246,7 +278,7 @@ onMounted(() => {
 });
 
 // Watch for changes in filter and sortBy options
-watch([filter, sortBy], () => {
+watch([sortBy, sort], () => {
     getTasks();
 });
 </script>

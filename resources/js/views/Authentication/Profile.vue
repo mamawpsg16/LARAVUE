@@ -1,6 +1,6 @@
 <template>
     <Navbar />
-    <div class="flex items-center justify-center">
+    <div class="flex items-center justify-center mt-2">
         <div class="flex flex-col">
             <div class="w-40 h-40 rounded-full overflow-hidden">
                 <img
@@ -88,13 +88,14 @@ import axios from "axios";
 import { ref, onMounted, inject } from "vue";
 import DatePicker from "vue-datepicker-next";
 import { showCustomToast } from "../../Utils/toast.js";
+import { useRouter } from 'vue-router';
 
 const $localStorage = inject("$localStorage");
 const access_token = $localStorage.getItem("access_token");
 const user = ref([]);
 const newProfile = ref('');
 const imagePreviewUrl = ref('');
-
+const router = useRouter();
 const handleFileUpload = function (event) {
     const file = event.target.files[0];
     newProfile.value = file;
@@ -106,7 +107,8 @@ const handleFileUpload = function (event) {
 };
 
 const getUserDetails = function () {
-    console.log(access_token);
+    let access_token = $localStorage.getItem("access_token");
+
     axios
         .get("/api/profile", {
             headers: {
@@ -117,23 +119,19 @@ const getUserDetails = function () {
             user.value = response.data;
             if (user.value.birth_date) {
                 user.value.birth_date = new Date(user.value.birth_date);
-            } else {
-                user.value.birth_date = new Date();
             }
         })
         .catch((error) => {
-            console.log(error);
         });
 };
 
 const updateProfile = function () {
-    // console.log(user.value.birth_date);
-    // console.log(new Date(user.value.birth_date).toDateString());
   const formData = new FormData();
   formData.append('username', user.value.username);
   formData.append('email', user.value.email);
   formData.append('about', user.value.about);
-  formData.append('birth_date', new Date(user.value.birth_date).toDateString());
+  console.log(user.value.birth_date,'BIRTH DATE');
+  formData.append('birth_date', user.value.birth_date ? new Date(user.value.birth_date).toDateString() : null);
   formData.append('profile_picture', newProfile.value);
 
   axios
@@ -145,10 +143,9 @@ const updateProfile = function () {
     })
     .then((response) => {
         user.value = response.data.user
+        console.log(user.value.birth_date);
         if (user.value.birth_date) {
             user.value.birth_date = new Date(user.value.birth_date);
-        } else {
-            user.value.birth_date = new Date();
         }
         showCustomToast("success", "Profile Updated!", {});
         // Reset the input file

@@ -104,6 +104,7 @@ import { reactive, ref, inject } from "vue";
 import { onMounted } from "vue";
 import Multiselect from "vue-multiselect";
 import DatePicker from "vue-datepicker-next";
+import auth from '../../Utils/auth.js';
 
 const date = ref(new Date());
 const router = useRouter();
@@ -118,16 +119,21 @@ const user_id = ref(null);
 const users = ref([]);
 const $localStorage = inject("$localStorage");
 
+const checkAuthentication = function(){
+    const invalidToken = auth.isAccessTokenInvalid();
+    if(invalidToken) {
+        router.push({name:'login'});
+    }
+}
 const store = () => {
     const access_token = $localStorage.getItem("bearer_token");
-
     axios
         .post(
             "/api/tasks",
             {
                 title: task.title,
                 description: task.description,
-                due_date: new Date(task.due_date).toDateString(),
+                due_date: task.due_date ? new Date(task.due_date).toDateString() : null,
                 user_id: user_id.value,
             },
             {
@@ -199,10 +205,12 @@ const selectAssignedUser = function (selectedOption, id) {
 
 const removeAssignedUser = function (removedOption, id) {
     selected_user.value = [];
+    user_id.value = null;
 };
 
 onMounted(() => {
     getUsers();
+    checkAuthentication();
 });
 </script>
 

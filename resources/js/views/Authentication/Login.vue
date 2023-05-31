@@ -4,7 +4,7 @@
       <div class="w-1/2">
         <h2 class="text-center text-2xl font-bold mb-4">LOGIN</h2>
         <p v-if="isLoggedIn" class="text-center text-green-500">{{ success_message }}</p>
-        <Form>
+        <Form @submit.prevent="login">
           <div>
             <Label label="Email" />
             <Input
@@ -28,13 +28,17 @@
           </div>
           <div class="flex justify-end">
               <button
-                type="button"
-                @click.prevent="login"
+                type="submit"
                 class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-2"
               >
                 Login
               </button>
           </div>
+          <!-- <div>
+            <button type="button" class="bg-red-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-2" @click="loginWithFacebook">Login with Facebook</button>
+            <br>
+            <button type="button" class="bg-gray-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-2" @click="loginWithGoogle">Login with Google</button>
+          </div> -->
         </Form>
       </div>
     </div>
@@ -48,13 +52,13 @@ import Input from "../../components/Form/Input.vue";
 import { useRouter } from "vue-router";
 import { ref, onMounted, reactive, computed, onBeforeUnmount, inject } from "vue";
 import axios from "axios";
-import { useAuthStore } from "../../stores/Auth.js";
+// import { useAuthStore } from "../../stores/Auth.js";
 // import { setCookie } from "../../Utils/cookie.js";
 
 // import { toast } from 'vue3-toastify';
 import { showCustomToast } from "../../Utils/toast.js";
 
-const storeAuthDetails = useAuthStore();
+// const storeAuthDetails = useAuthStore();
 const $localStorage = inject('$localStorage');
 
 const user_account = reactive({
@@ -66,6 +70,22 @@ const users = ref([]);
 const errors = ref([]);
 const success_message = ref("");
 const router = useRouter();
+const access_token = $localStorage.getItem("access_token");
+const loginWithFacebook = function () {
+  axios.get('/login/facebook').then((response) => {
+    console.log(response)
+  }).catch((error) => {
+    console.log(error)
+  })
+}
+
+const loginWithGoogle = function () {
+  axios.get('/login/google').then((response) => {
+    console.log(response)
+  }).catch((error) => {
+    console.log(error)
+  })
+}
 
 // const showAlert = function() {
 //   $swal.fire({
@@ -87,7 +107,6 @@ const login = () => {
     axios
         .post("/api/login", user_account)
         .then((response) => {
-            console.log(response);
             const { user_id, access_token } = response.data;
             $localStorage.setItem("user_id", user_id);
             $localStorage.setItem("access_token", access_token);
@@ -95,15 +114,9 @@ const login = () => {
             router.push({ name: "dashboard" });
         })
         .catch((error) => {
-            console.log(error.response);
             // Handle request error
             if (error.response?.status === 422) {
                 // Handle validation errors
-                console.log("ERROR");
-                console.log(error.response.data.errors);
-                console.log("SHIT");
-               
-                console.log(error.response.data.errors);
                 errors.value = error.response.data.errors;
             }else if(error.response?.status === 401){
                 if (error.response.data.errors.not_exists?.length) {
@@ -116,13 +129,11 @@ const login = () => {
                 }
             }else {
                 // Handle other errors
-                console.log(error);
             }
         });
 };
 
 onMounted(() => {
-    console.log(storeAuthDetails.$state.auth_user);
 });
 /** COMPUTED */
 const hasErrors = computed(() => {

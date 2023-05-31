@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\SocialController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +18,8 @@ Route::get('/{any?}', function(){
     return view('app');
 })->where('any', '[\/\w\.-]*');
 
+Route::get('/login/{provider}', [SocialController::class, 'redirectToProvider']);
+Route::get('/login/{provider}/callback', [SocialController::class, 'handleProviderCallback']);
 // Route::get('/', function () {
 //     return view('components.app');
 // });
