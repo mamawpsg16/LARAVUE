@@ -16,7 +16,9 @@ Use the following command to clone the repository:
 ## Install Dependencies
 
 After cloning the repository with : git clone https://github.com/mamawpsg16/LARAVUE.git
-install the project dependencies: composer install, npm install
+install the project dependencies: 
+- composer install
+- npm install
 
 ## Set Up Environment Variables
 
