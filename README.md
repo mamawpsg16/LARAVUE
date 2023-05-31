@@ -4,7 +4,7 @@ This is a Laravel 8 project integrated with Vue 3 for frontend development.
 
 ## Prerequisites
 
-- PHP
+- PHP 8.1
 - Composer
 - Node.js and npm
 
@@ -17,8 +17,8 @@ Use the following command to clone the repository:
 
 After cloning the repository with : git clone https://github.com/mamawpsg16/LARAVUE.git
 install the project dependencies: 
-- composer install
-- npm install
+- composer install 
+- npm install 
 
 ## Set Up Environment Variables
 
