@@ -1,4 +1,4 @@
-# Laravel 8 with Vue 3 Project
+# Task Managemnt App with JWT Authentication Laravel 8 with Vue 3 Project
 
 This is a Laravel 8 project integrated with Vue 3 for frontend development.
 
