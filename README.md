@@ -34,6 +34,6 @@ To compile the assets and enable Vue 3 support, run the following command: npm r
 Use the following command to start the Laravel development server: php artisan serve
 
 ## Generate Authorization Secretkey for JWTAuth
-Use the following command to generate secretkey php artisan jwt:secret
+Use the following command to generate JWT_SECRET: php artisan jwt:secret
 
 
