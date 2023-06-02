@@ -37,3 +37,10 @@ Use the following command to start the Laravel development server: php artisan s
 Use the following command to generate JWT_SECRET: php artisan jwt:secret
 
 
+## Run Migration
+Use the following command : php artisan migrate
+
+## Run DB Seeder for Admin Access
+Use the following command : php artisan db:seed
+
+
