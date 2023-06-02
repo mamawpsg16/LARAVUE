@@ -19,8 +19,6 @@ class CreateRoleModulePermissionTable extends Migration
             $table->foreignId('module_id')->constrained()->onDelete('cascade');
             $table->foreignId('permission_id')->constrained()->onDelete('cascade');
             $table->timestamps();
-
-          
         });
     }
 

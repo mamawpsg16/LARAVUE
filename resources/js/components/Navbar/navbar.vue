@@ -17,7 +17,7 @@
                 ></component>
             </div>
         </nav>
-        <Sidebar :sidebarOpen="sidebarOpen" @toggle-sidebar="toggleSidebar" />
+        <Sidebar v-if="isAuthenticated" :sidebarOpen="sidebarOpen" @click="toggleSidebar" />
     </div>
 </template>
 

@@ -17,8 +17,8 @@ class CreateModulesTable extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->string('route');
-            $table->string('icon');
-            $table->string('description');
+            $table->string('icon')->nullable();
+            $table->string('description')->nullable();
             $table->timestamps();
         });
     }

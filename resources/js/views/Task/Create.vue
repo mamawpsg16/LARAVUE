@@ -1,8 +1,16 @@
 <template>
     <Navbar />
     <form class="container mx-auto w-3/6 h-full mt-2">
+        <div class="flex justify-start mb-4">
+            <router-link
+                to="/tasks"
+                class="px-4 py-2 text-white bg-amber-400 rounded-md hover:bg-amber-500"
+            >
+                <i class="fa-solid fa-arrow-left"></i>
+            </router-link>
+        </div>
         <div
-            v-show="selected_user.profile_picture"
+            v-if="selected_user.profile_picture"
             class="flex items-center justify-center"
         >
             <div class="flex flex-col">
@@ -81,7 +89,7 @@
                     errors.due_date[0]
                 }}</span>
             </div>
-            <div class="flex justify-end ">
+            <div class="flex justify-end">
                 <button
                     @click.prevent="store"
                     class="px-4 py-2 mt-4 font-bold text-white bg-blue-500 rounded-md"
@@ -104,7 +112,7 @@ import { reactive, ref, inject } from "vue";
 import { onMounted } from "vue";
 import Multiselect from "vue-multiselect";
 import DatePicker from "vue-datepicker-next";
-import auth from '../../Utils/auth.js';
+import auth from "../../Utils/auth.js";
 
 const date = ref(new Date());
 const router = useRouter();
@@ -119,12 +127,12 @@ const user_id = ref(null);
 const users = ref([]);
 const $localStorage = inject("$localStorage");
 
-const checkAuthentication = function(){
+const checkAuthentication = function () {
     const invalidToken = auth.isAccessTokenInvalid();
-    if(invalidToken) {
-        router.push({name:'login'});
+    if (invalidToken) {
+        router.push({ name: "login" });
     }
-}
+};
 const store = () => {
     const access_token = $localStorage.getItem("bearer_token");
     axios
@@ -133,7 +141,9 @@ const store = () => {
             {
                 title: task.title,
                 description: task.description,
-                due_date: task.due_date ? new Date(task.due_date).toDateString() : null,
+                due_date: task.due_date
+                    ? new Date(task.due_date).toDateString()
+                    : null,
                 user_id: user_id.value,
             },
             {

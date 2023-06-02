@@ -86,7 +86,9 @@ class TaskController extends Controller
     public function update(UpdateTaskRequest $request, Task $task)
     {
         // dd($request->input('user_id'));
-
+        // dd($request->input('user_id'),$task->user_id);
+        // dd($request->input('user_id') && $task->user_id != $request->input('user_id'));
+        $old_user_id =  $task->user_id;
         $task->update([
             'title' => $request->input('title'),
             'description' => $request->input('description'),
@@ -94,7 +96,8 @@ class TaskController extends Controller
             'user_id'     => $request->input('user_id')
         ]);
 
-        if($request->input('user_id')){
+        // dd($request->input('user_id') && $old_user_id != $request->input('user_id'));
+        if($request->input('user_id') &&  $old_user_id != $request->input('user_id')){
             $assignedUser = User::find( $request->input('user_id'));
             $assignedUser->notify(new TaskNotification($task));
     

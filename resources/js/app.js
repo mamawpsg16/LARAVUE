@@ -19,14 +19,19 @@ import 'vue-multiselect/dist/vue-multiselect.css'
 import 'vue-datepicker-next/index.css';
 import Navbar from './components/Navbar/navbar.vue'
 import Sidebar from './components/Navbar/sidebar.vue'
+import  DataTables  from 'datatables.net-vue3';
+import DataTablesCore from 'datatables.net';
+import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
+import 'datatables.net-dt/css/jquery.dataTables.min.css';
+import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
 
 const app = createApp(App);
-
 
 app.use(pinia)
 app.component('Navbar', Navbar);
 app.component('Sidebar', Sidebar);
-
+DataTables.use(DataTablesCore);
+app.component('DataTable', DataTables);
 app.provide('$localStorage', {
   setItem,
   getItem,

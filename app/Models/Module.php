@@ -9,5 +9,5 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Module extends Model
 {
     use HasFactory;
-  
+    protected $fillable = ['name','route','icon','description'];
 }

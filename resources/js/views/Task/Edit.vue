@@ -1,8 +1,8 @@
 <template>
     <Navbar />
-    <form class="container mx-auto w-3/6 h-full mt-2">
+    <form class="container mx-auto w-3/6 h-full mt-2 mb-2">
         <div
-            v-show="selected_user?.profile_picture"
+            v-if="selected_user?.profile_picture"
             class="flex items-center justify-center"
         >
             <div class="flex flex-col">
@@ -80,7 +80,13 @@
                     errors.due_date[0]
                 }}</span>
             </div>
-            <div class="flex justify-end">
+            <div class="flex justify-end space-x-1">
+                <router-link
+                    :to="`/task/${task.id}`"
+                    class="px-4 py-2 mt-4 font-bold text-white bg-gray-500 rounded-md"
+                >
+                    Cancel
+                </router-link>
                 <button
                     @click.prevent="update"
                     class="px-4 py-2 mt-4 font-bold text-white bg-blue-500 rounded-md"
@@ -187,8 +193,8 @@ const update = () => {
                 });
                 // console.log(task.value.id);
                 // router.push({ name: '/task/',  params: { id: task.value.id } });
-                // router.push(`/task/${task.value.id}`);
-                router.push("/tasks");
+                router.push(`/task/${task.value.id}`);
+                // router.push("/tasks");
                 // Success, redirect or show a success message
             }
         })

@@ -4,50 +4,22 @@
         <div class="flex flex-col items-center justify-center mt-8">
             <div class="flex justify-start w-2/4">
                 <router-link
-                    to="/tasks"
+                    to="/user-roles"
                     class="px-4 py-2 text-white bg-amber-400 rounded-md hover:bg-amber-500"
                 >
                     <i class="fa-solid fa-arrow-left"></i>
                 </router-link>
             </div>
             <div class="bg-white rounded-lg shadow-lg space-y-2 w-2/4">
-                <div class="flex justify-center">
-                    <div class="w-40 h-40 rounded-full overflow-hidden">
-                        <img
-                            :src="task.user?.profile_picture"
-                            alt="Profile Picture"
-                            class="object-cover w-full h-full"
-                        />
-                    </div>
+                <div class="space-y-4 mt-4 text-center">
+                    <p><span class="text-lg">Name: </span>{{ user_roles.name }}</p>
                 </div>
-                <div v-if="task.user">
-                    <p class="text-lg">
-                        <span class="">Username: </span>{{ task.user.username }}
-                    </p>
-                </div>
-                <div v-else>
-                    <p class="text-lg">Not assigned yet!</p>
-                </div>
-                <div class="space-y-4 mt-4">
-                    <p><span class="text-lg">Title: </span>{{ task.title }}</p>
-                    <p>
-                        <span class="text-lg">Description: </span>
-                        <span class="text-center">
-                            {{ task.description }}
-                        </span>
-                    </p>
-                    <p>
-                        <span class="text-lg">Due Date: </span
-                        >{{ $date.humanReadable(task.due_date) }}
-                    </p>
-                    <p>
-                        <span class="text-lg">Status: </span
-                        >{{ task.status_description }}
-                    </p>
+                <div class="space-y-4 mt-4 text-center">
+                    <p><span class="text-lg">Users: </span>{{ user_roles.users }}</p>
                 </div>
                 <div class="flex justify-end p-4 bg-gray-100 rounded-b-lg">
                     <router-link
-                        :to="`/task/edit/${task.id}`"
+                        :to="`/user-role/edit/${user_roles.id}`"
                         class="px-4 py-2 text-white bg-cyan-500 rounded-md hover:bg-cyan-600"
                     >
                         <svg
@@ -79,31 +51,32 @@ import { useRouter } from "vue-router";
 
 const route = useRoute();
 const router = useRouter();
-const task = ref({});
-const getTasks = (task_id) => {
+const user_roles = ref({});
+const getUserRoles = (role_id) => {
     const access_token = localStorage.getItem("bearer_token");
-    // const task_id = route.params.id;
+    // const user_roles_id = route.params.id;
     axios
-        .get(`/api/tasks/${task_id}`, {
+        .get(`/api/user-roles/${role_id}`, {
             headers: {
                 Authorization: `Bearer ${access_token}`,
             },
         })
         .then((response) => {
-            task.value = response.data;
+            console.log(response);
+            user_roles.value = response.data;
         });
 };
 
 watch(
     () => route.params.id,
-    (newTaskId) => {
-        getTasks(newTaskId);
+    (newUserRoleId) => {
+        getUserRoles(newUserRoleId);
     }
 );
 
 onMounted(() => {
-    const initialTaskId = route.params.id;
-    getTasks(initialTaskId);
+    const initialUserRoleId = route.params.id;
+    getUserRoles(initialUserRoleId);
 });
 </script>
 

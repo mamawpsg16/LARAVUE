@@ -29,7 +29,7 @@
                     </svg>
                     <span
                         v-if="store.unreadCount"
-                        class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full"
+                        class="absolute -top-2 right-5 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full"
                         >{{ store.unreadCount }}</span
                     >
                 </button>
