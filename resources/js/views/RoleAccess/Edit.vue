@@ -3,7 +3,7 @@
     <form class="container mx-auto w-3/6 h-full mt-2">
         <div class="flex justify-start mb-4">
             <router-link
-                to="/role-access"
+                :to="`/role-access/${role.id}`"
                 class="px-4 py-2 text-white bg-amber-400 rounded-md hover:bg-amber-500"
             >
                 <i class="fa-solid fa-arrow-left"></i>

@@ -47,7 +47,7 @@ class ModuleController extends Controller
         $validator = Validator::make($request->only(['name','route','icon','description']), [
             'name' => 'required|unique:modules',
             'route' => 'required',
-            'icon' => 'required',
+            // 'icon' => 'required',
             'description' => 'required',
         ]);
 
@@ -89,7 +89,7 @@ class ModuleController extends Controller
         $validator = Validator::make($request->only(['name','route','icon','description']), [
             'name' => ['required',Rule::unique('roles')->ignore($module->id)],
             'route' => 'required',
-            'icon' => 'required',
+            // 'icon' => 'required',
             'description' => 'required',
         ]);
 

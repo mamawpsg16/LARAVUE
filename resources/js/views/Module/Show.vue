@@ -4,7 +4,7 @@
         <div class="flex flex-col items-center justify-center mt-8">
             <div class="flex justify-start w-2/4">
                 <router-link
-                    to="/tasks"
+                    to="/modules"
                     class="px-4 py-2 text-white bg-amber-400 rounded-md hover:bg-amber-500"
                 >
                     <i class="fa-solid fa-arrow-left"></i>

@@ -159,6 +159,9 @@ class UserRoleController extends Controller
      */
     public function destroy($id)
     {
-        //
+        DB::table('role_user')
+                     ->where('role_id',$id)
+                     ->delete();
+        return response()->json(true);
     }
 }

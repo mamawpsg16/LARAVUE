@@ -38,31 +38,31 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Tasks',
                 'route' => '/tasks',
+                'icon' => 'fa-solid fa-list',
                 'description' => 'Manage Tasks',
             ],
-            // [
-            //     'name' => 'Roles',
-            //     'route' => '/roles',
-            //     'description' => 'Roles',
-            // ],
             [
                 'name' => 'Modules',
                 'route' => '/modules',
+                'icon' => 'fa-solid fa-book-open-reader',
                 'description' => 'Modules',
             ],
             [
                 'name' => 'Permissions',
                 'route' => '/permissions',
+                'icon' => 'fa-solid fa-pen-to-square',
                 'description' => 'Permissions',
             ],
             [
                 'name' => 'Role Access',
                 'route' => '/role-access',
+                'icon' => 'fa-solid fa-feather-pointed',
                 'description' => 'Role Access',
             ],
             [
                 'name' => 'User Roles',
                 'route' => '/user-roles',
+                'icon' => 'fa-solid fa-address-card',
                 'description' => 'User Roles',
             ],
         ];

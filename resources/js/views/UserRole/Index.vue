@@ -128,7 +128,7 @@ const deleteUserRole = function (role_id) {
         if (result.value) {
             const access_token = localStorage.getItem("bearer_token");
             axios
-                .delete(`/api/user_roles/${role_id}`, {
+                .delete(`/api/user-roles/${role_id}`, {
                     headers: {
                         Authorization: `Bearer ${access_token}`,
                     },
