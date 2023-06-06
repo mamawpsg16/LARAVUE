@@ -39,6 +39,7 @@ class AuthenticationController extends Controller
             'password'    => bcrypt($request->input('password'))
         ]);
 
+        // DB::table('role_user')->insert(['role_id' => 2,])
         
         // $token = $user->createToken('access_token')->plainTextToken;
 

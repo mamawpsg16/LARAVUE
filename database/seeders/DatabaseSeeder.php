@@ -29,6 +29,10 @@ class DatabaseSeeder extends Seeder
             'name' => 'Admin',
         ]);
 
+        $userRole = Role::create([
+            'name' => 'User',
+        ]);
+
         $roleUser = DB::table('role_user')->insert([
             'role_id' => $adminRole->id,
             'user_id' => $admin->id

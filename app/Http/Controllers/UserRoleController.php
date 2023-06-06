@@ -96,12 +96,13 @@ class UserRoleController extends Controller
     public function getUserRoleEditDetails(Role $role){
         
         $user_roles = DB::table('roles as r')
-        ->JOIN('role_user as ru','r.id','ru.role_id')
-        ->JOIN('users as u','ru.user_id','u.id')
-        ->select('u.id','u.email')
+        ->join('role_user as ru', 'r.id', '=', 'ru.role_id')
+        ->join('users as u', 'ru.user_id', '=', 'u.id')
+        ->select('u.id', 'u.email',DB::raw('MAX(u.username) as username') )
         ->where('ru.role_id', $role->id)
-        ->orderByDesc('r.created_at')
-        ->get()->toArray();
+        ->groupBy('u.id', 'u.email') // Add 'u.email' to the groupBy clause
+        ->get()
+        ->toArray();
         return response()->json(['user_roles_' => $user_roles,'role_' => $role]);
       
     }
