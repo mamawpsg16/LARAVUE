@@ -1,5 +1,9 @@
 <template>
-    <Navbar/>
+    <Navbar />
+    <!-- <BaseModal v-model="isModalOpen" :modalClass="customModalClass">
+        <template v-slot:modal-title> Create Task </template>
+    </BaseModal> -->
+    <!-- <create :isModalOpen="isModalOpen" ></create> -->
     <div class="p-4">
         <h1 class="text-2xl font-bold text-center">TASKS</h1>
         <!-- <button @click="toggleModal">Modal</button> -->
@@ -54,15 +58,29 @@
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 448 512"
                 >
-                    <!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                   
                     <path
                         d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"
                     />
                 </svg>
             </router-link>
+            <!-- <button
+                @click="toggleModal"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-md"
+            >
+                <svg
+                    class="h-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 448 512"
+                >
+                    <path
+                        d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"
+                    />
+                </svg>
+            </button> -->
         </div>
         <div class="flex justify-end">
-                <p class="text-lg">Count: {{ tasks.length }}</p>
+            <p class="text-lg">Count: {{ tasks.length }}</p>
         </div>
         <template v-if="tasks.length">
             <div
@@ -96,7 +114,8 @@
                         </div>
                         <div class="space-y-3">
                             <p class="mt-2">
-                                <span class="text-lg">Title: </span>{{ task.title }}
+                                <span class="text-lg">Title: </span
+                                >{{ task.title }}
                             </p>
                             <p>
                                 <span class="text-lg">Description: </span
@@ -112,7 +131,7 @@
                             </p> -->
                         </div>
                     </div>
-                    <div class="mt-3  flex justify-end">
+                    <div class="mt-3 flex justify-end">
                         <div class="space-x-2">
                             <router-link
                                 :to="`/task/${task.id}`"
@@ -156,18 +175,6 @@
         </template>
         <p v-else class="mt-4">No Tasks Yet...</p>
     </div>
-    <!-- <modal title="Filter"  :isModalOpen="isModalOpen">
-        <label for="assignee" class="text-lg">Assignee:</label>
-                <multiselect
-                    v-model="selected_user"
-                    :options="users"
-                    :allow-empty="true"
-                    placeholder="Select a user"
-                    label="email"
-                    track-by="email"
-                    class="mt-2"
-                ></multiselect>
-    </modal> -->
 </template>
 
 <script setup>
@@ -177,11 +184,13 @@ import Label from "../../components/Form/Label.vue";
 import Swal from "../../Utils/swal.js";
 import { showCustomToast } from "../../Utils/toast.js";
 import { useRouter } from "vue-router";
-import modal from '../../components/modal.vue'
+import modal from "../../components/modal.vue";
 import Multiselect from "vue-multiselect";
-
+import BaseModal from "../../components/BaseModal.vue";
+import Create from './Create.vue';
+const customModalClass = ref("w-full sm:w-1/4 md:w-1/3 lg:w-1/3");
 const router = useRouter();
-const users = ref()
+const users = ref();
 const tasks = ref([]);
 const filter = ref("all"); // Default filter option
 const sortBy = ref("default"); // Default sort option
@@ -189,7 +198,11 @@ const sort = ref("desc"); // Default sort option
 const $localStorage = inject("$localStorage");
 const all_tasks = ref([]);
 const access_token = localStorage.getItem("bearer_token");
-const isModalOpen = ref(false);
+// const isModalOpen = ref(false);
+
+// const toggleModal = function () {
+//     isModalOpen.value = !isModalOpen.value;
+// };
 const getTasks = () => {
     const access_token = $localStorage.getItem("bearer_token");
     const user_id = $localStorage.getItem("user_id");
@@ -248,13 +261,14 @@ const filterStatus = function (e) {
         // Store the original tasks array if it hasn't been stored yet
         all_tasks.value = tasks.value;
     }
-    console.log(e.target.value, e.target.value != 'all');
-    if(e.target.value != 'all'){
-      const filtered_tasks = all_tasks.value.filter(task => parseInt(task.status) === parseInt(e.target.value));
-     return tasks.value = filtered_tasks;
+    console.log(e.target.value, e.target.value != "all");
+    if (e.target.value != "all") {
+        const filtered_tasks = all_tasks.value.filter(
+            (task) => parseInt(task.status) === parseInt(e.target.value)
+        );
+        return (tasks.value = filtered_tasks);
     }
     tasks.value = all_tasks.value;
-  
 };
 
 // const toggleModal = function () {

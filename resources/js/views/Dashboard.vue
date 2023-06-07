@@ -1,6 +1,37 @@
 <template>
     <Navbar />
-<div class="container mx-auto px-4 mt-5">
+    <div class="container mx-auto px-4 mt-5">
+        <!-- <button @click="toggleModal">Open Modal</button> -->
+        <!-- <BaseModal :modalClass="customModalClass" v-model="isModalOpen">
+            <h2 class="text-2xl mb-4">Modal Title</h2>
+            <div class="mt-4">
+                <label for="name" class="text-lg">Name :</label>
+                <input
+                    id="name"
+                    type="text"
+                    placeholder="Enter name"
+                    class="w-full px-4 py-2 mt-1 border rounded-md"
+                />
+            </div>
+            <div class="mt-4">
+                <label for="name" class="text-lg">Route :</label>
+                <input
+                    id="route"
+                    type="text"
+                    placeholder="Enter route"
+                    class="w-full px-4 py-2 mt-1 border rounded-md"
+                />
+                <span class="text-red-500"></span>
+            </div>
+            <div class="flex justify-end">
+                <button
+                    @click.prevent="store"
+                    class="px-4 py-2 mt-4 font-bold text-white bg-blue-500 rounded-md"
+                >
+                    Save
+                </button>
+            </div>
+        </BaseModal> -->
         <!-- <h1 class="text-3xl font-bold my-6">DASHBOARD</h1> -->
         <div class="grid grid-cols-2 gap-4">
             <div
@@ -62,19 +93,25 @@
 <script setup>
 import axios from "axios";
 import { onMounted, ref, reactive } from "vue";
-import { getItem } from '../Utils/localStorage.js'
+import { getItem } from "../Utils/localStorage.js";
 // import { useNotificationStore } from '../stores/notificationStore.js'
+// import BaseModal from "../components/BaseModal.vue";
+// const customModalClass = ref('w-full md:w-2/3 lg:w-1/2');
 
-// const store = useNotificationStore()
+const registeredUsersCount = ref(0);
+// const isModalOpen = ref(false);
+// onClickOutside(modal, () =>(isModalOpen.value = false))
 
-const registeredUsersCount =  ref(0); 
+// const toggleModal = function(e){
+//     isModalOpen.value = !isModalOpen.value;
+// }
 const Tasks = reactive({
-     pending : 0, 
-     ongoing : 0, 
-     complete : 0, 
-     cancelled : 0,
-     total : 0,
-})
+    pending: 0,
+    ongoing: 0,
+    complete: 0,
+    cancelled: 0,
+    total: 0,
+});
 const getDashboardInformation = async function () {
     const access_token = getItem("access_token");
     await axios
@@ -83,16 +120,16 @@ const getDashboardInformation = async function () {
         })
         .then((response) => {
             const { users, tasks } = response.data;
-            console.log(tasks,'SHIOT');
-            console.log(Tasks.pending)
+            console.log(tasks, "SHIOT");
+            console.log(Tasks.pending);
             Tasks.pending = tasks.pending;
             Tasks.ongoing = tasks.ongoing;
             Tasks.complete = tasks.complete;
             Tasks.cancelled = tasks.cancelled;
             Tasks.total = tasks.tasks;
-          
+
             registeredUsersCount.value = users;
-            // totalTasks.value = tasks; 
+            // totalTasks.value = tasks;
         })
         .catch((error) => {
             console.log(error);
@@ -100,6 +137,6 @@ const getDashboardInformation = async function () {
 };
 
 onMounted(() => {
-    getDashboardInformation()
+    getDashboardInformation();
 });
 </script>

@@ -11,6 +11,7 @@
 </head>
 <body>
     <div id="app"></div>
+    <div id="modal"></div>
     <script src="{{ mix('js/app.js') }}"></script>
 </body>
 </html>
