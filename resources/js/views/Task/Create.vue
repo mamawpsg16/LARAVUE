@@ -3,7 +3,7 @@
     <!-- <form class="container mx-auto min-h-min mt-5 w-full"></form> -->
     <!-- <BaseModal v-model="modalToggle" :modalClass="customModalClass"> -->
         
-        <form class="container mx-auto w-3/6 h-full mt-2">
+        <form class="container mx-auto min-h-min mt-5 w-full">
             <!-- <div class="flex justify-start mb-4">
                 <router-link
                     to="/tasks"
@@ -17,7 +17,7 @@
                 class="flex items-center justify-center"
             >
                 <div class="flex flex-col">
-                    <div class="w-40 h-40 rounded-full overflow-hidden">
+                    <div class="w-36 h-36 rounded-full overflow-hidden">
                         <img
                             :src="selected_user.profile_picture"
                             alt="Profile Picture"
@@ -92,7 +92,7 @@
                         errors.due_date[0]
                     }}</span>
                 </div>
-                <div class="flex justify-end">
+                <div class="flex justify-end mb-5">
                     <button
                         @click.prevent="store"
                         class="px-4 py-2 mt-4 font-bold text-white bg-blue-500 rounded-md"
@@ -116,7 +116,9 @@ import { reactive, ref, inject, watchEffect, onMounted } from "vue";
 import Multiselect from "vue-multiselect";
 import DatePicker from "vue-datepicker-next";
 import auth from "../../Utils/auth.js";
+import { useTaskStore } from '../../stores/TaskStore.js'
 
+const taskState = useTaskStore()
 // import BaseModal from "../../components/BaseModal.vue";
 
 // const customModalClass = ref("w-full sm:w-1/4 md:w-1/3 lg:w-1/3");
@@ -177,9 +179,15 @@ const store = () => {
             if (response.data) {
                 // Store the token in local storage
 
+                selected_user.value = [];
+                errors.value = [];
+                task.title = "";
+                task.description = "";
+                task.due_date = new Date();
                 showCustomToast("success", "Task Created!", {
                     // position: 'bottom-right',
                 });
+                taskState.$state.created = Math.random() * 50000;
                 router.push({ name: "tasks" });
                 // Success, redirect or show a success message
             }
@@ -240,6 +248,8 @@ const removeAssignedUser = function (removedOption, id) {
 onMounted(() => {
     getUsers();
     checkAuthentication();
+    console.log(selected_user.value);
+    console.log(task);
 });
 </script>
 

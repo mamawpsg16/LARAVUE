@@ -41,7 +41,7 @@ class TaskController extends Controller
                 $query->orderBy('title',$request->query('sort'));
             }
         }
-        if($user->email != 'kevinmensah114@gmail.com'){
+        if($user->email != 'admin@admin.com'){
             $query->where('user_id',$user->id);
         }
         $tasks = $query->get();

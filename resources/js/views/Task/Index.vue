@@ -1,9 +1,9 @@
 <template>
     <Navbar />
-    <!-- <BaseModal v-model="isModalOpen" :modalClass="customModalClass">
-        <template v-slot:modal-title> Create Task </template>
-    </BaseModal> -->
-    <!-- <create :isModalOpen="isModalOpen" ></create> -->
+    <BaseModal v-model="isModalOpen" >
+        <template #modal-title>New Task</template>
+        <create></create>
+    </BaseModal>
     <div class="p-4">
         <h1 class="text-2xl font-bold text-center">TASKS</h1>
         <!-- <button @click="toggleModal">Modal</button> -->
@@ -49,7 +49,7 @@
                     </select>
                 </div>
             </div>
-            <router-link
+            <!-- <router-link
                 to="/task/create"
                 class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-md"
             >
@@ -63,8 +63,8 @@
                         d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"
                     />
                 </svg>
-            </router-link>
-            <!-- <button
+            </router-link> -->
+            <button
                 @click="toggleModal"
                 class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-md"
             >
@@ -77,7 +77,7 @@
                         d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"
                     />
                 </svg>
-            </button> -->
+            </button>
         </div>
         <div class="flex justify-end">
             <p class="text-lg">Count: {{ tasks.length }}</p>
@@ -188,7 +188,9 @@ import modal from "../../components/modal.vue";
 import Multiselect from "vue-multiselect";
 import BaseModal from "../../components/BaseModal.vue";
 import Create from './Create.vue';
-const customModalClass = ref("w-full sm:w-1/4 md:w-1/3 lg:w-1/3");
+import { useTaskStore } from '../../stores/TaskStore.js'
+
+const customModalClass = ref("w-full xs:w-3/4 sm:w-3/4 md:w-2/3 lg:w-6/12");
 const router = useRouter();
 const users = ref();
 const tasks = ref([]);
@@ -198,11 +200,12 @@ const sort = ref("desc"); // Default sort option
 const $localStorage = inject("$localStorage");
 const all_tasks = ref([]);
 const access_token = localStorage.getItem("bearer_token");
-// const isModalOpen = ref(false);
+const isModalOpen = ref(false);
 
-// const toggleModal = function () {
-//     isModalOpen.value = !isModalOpen.value;
-// };
+const taskState = useTaskStore()
+const toggleModal = function () {
+    isModalOpen.value = !isModalOpen.value;
+};
 const getTasks = () => {
     const access_token = $localStorage.getItem("bearer_token");
     const user_id = $localStorage.getItem("user_id");
@@ -271,9 +274,7 @@ const filterStatus = function (e) {
     tasks.value = all_tasks.value;
 };
 
-// const toggleModal = function () {
-//     isModalOpen.value = !isModalOpen.value;
-// };
+
 const deleteTask = function (task_id) {
     Swal("Delete Task!", "Are you sure?", "warning", "Yes", {
         showCancelButton: true,
@@ -315,6 +316,16 @@ onMounted(() => {
 watch([sortBy, sort], () => {
     getTasks();
 });
+
+watch(
+  () => taskState.$state.created,
+  (newValue) => {
+    if (newValue) {
+      // Call getTasks function to fetch the updated tasks
+      getTasks();
+    }
+  }
+);
 </script>
 <style scoped>
 .task-container {

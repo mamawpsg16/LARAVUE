@@ -1,6 +1,10 @@
 <template>
     <Navbar />
     <div class="container mx-auto px-4 mt-5">
+        <custom-button @button-click="handleClick"></custom-button>
+        {{ message }}
+        <custom-input v-model="input_value"></custom-input>
+        {{ input_value }}
         <!-- <button @click="toggleModal">Open Modal</button> -->
         <!-- <BaseModal :modalClass="customModalClass" v-model="isModalOpen">
             <h2 class="text-2xl mb-4">Modal Title</h2>
@@ -94,10 +98,17 @@
 import axios from "axios";
 import { onMounted, ref, reactive } from "vue";
 import { getItem } from "../Utils/localStorage.js";
+import CustomButton from '../components/Form/Button.vue'
+import CustomInput from '../components/Form/Input.vue'
 // import { useNotificationStore } from '../stores/notificationStore.js'
 // import BaseModal from "../components/BaseModal.vue";
 // const customModalClass = ref('w-full md:w-2/3 lg:w-1/2');
-
+const input_value = ref(null);
+const message = ref(null);
+const handleClick = (data) =>{
+    console.log(data);
+    message.value = data;
+}
 const registeredUsersCount = ref(0);
 // const isModalOpen = ref(false);
 // onClickOutside(modal, () =>(isModalOpen.value = false))

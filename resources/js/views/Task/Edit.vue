@@ -1,12 +1,12 @@
 <template>
-    <Navbar />
-    <form class="container mx-auto w-3/6 h-full mt-2 mb-2">
+    <!-- <Navbar /> -->
+    <form class="container mx-auto min-h-min w-full  mt-5">
         <div
             v-if="selected_user?.profile_picture"
             class="flex items-center justify-center"
         >
             <div class="flex flex-col">
-                <div class="w-40 h-40 rounded-full overflow-hidden">
+                <div class="w-36 h-36 rounded-full overflow-hidden">
                     <img
                         :src="selected_user?.profile_picture"
                         alt="Profile Picture"
@@ -80,13 +80,20 @@
                     errors.due_date[0]
                 }}</span>
             </div>
-            <div class="flex justify-end space-x-1">
-                <router-link
+            <div class="flex justify-end space-x-1 mb-5">
+                <!-- <router-link
                     :to="`/task/${task.id}`"
                     class="px-4 py-2 mt-4 font-bold text-white bg-gray-500 rounded-md"
                 >
                     Cancel
-                </router-link>
+                </router-link> -->
+                <button
+                    type="button"
+                    @click="closeModal"
+                    class="px-4 py-2 mt-4 font-bold text-white bg-blue-500 rounded-md"
+                >
+                    Close
+                </button>
                 <button
                     @click.prevent="update"
                     class="px-4 py-2 mt-4 font-bold text-white bg-blue-500 rounded-md"
@@ -109,7 +116,7 @@ import { reactive, ref, inject } from "vue";
 import { onMounted } from "vue";
 import Multiselect from "vue-multiselect";
 import DatePicker from "vue-datepicker-next";
-
+import { useTaskStore } from '../../stores/TaskStore.js'
 const users = ref([]);
 const router = useRouter();
 const route = useRoute();
@@ -118,6 +125,13 @@ const task = ref([]);
 const user_id = ref(null);
 const selected_user = ref([]);
 const $localStorage = inject("$localStorage");
+
+const emit = defineEmits(['close-modal']);
+const taskStore = useTaskStore();
+
+const closeModal = function(){
+    emit('close-modal',false)
+}
 
 const getTasks = () => {
     const access_token = $localStorage.getItem("bearer_token");
@@ -191,9 +205,10 @@ const update = () => {
                 showCustomToast("success", "Task Updated!", {
                     // position: 'bottom-right',
                 });
+                taskStore.$state.updated = Math.random() * 50000;
                 // console.log(task.value.id);
                 // router.push({ name: '/task/',  params: { id: task.value.id } });
-                router.push(`/task/${task.value.id}`);
+                // router.push(`/task/${task.value.id}`);
                 // router.push("/tasks");
                 // Success, redirect or show a success message
             }

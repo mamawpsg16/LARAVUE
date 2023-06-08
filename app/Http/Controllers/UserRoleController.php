@@ -45,7 +45,7 @@ class UserRoleController extends Controller
                         ->count();
                     
                     if ($existingCount > 0) {
-                        $fail('The user already has this role.');
+                        $fail('The role already been created.');
                     }
                 }],
                 'user' => ['required','array','min:1']
