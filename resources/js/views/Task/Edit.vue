@@ -1,26 +1,26 @@
 <template>
     <!-- <Navbar /> -->
     <form class="container mx-auto min-h-min w-full  mt-5">
-        <div
-            v-if="selected_user?.profile_picture"
-            class="flex items-center justify-center"
-        >
-            <div class="flex flex-col">
-                <div class="w-36 h-36 rounded-full overflow-hidden">
-                    <img
-                        :src="selected_user?.profile_picture"
-                        alt="Profile Picture"
-                        class="object-cover w-full h-full"
-                    />
-                </div>
+        <div v-if="selected_users.length" class="flex justify-center space-x-1">
+            <div
+                class="w-20 h-20 rounded-full overflow-hidden"
+                v-for="selected_user in selected_users"
+                :key="selected_user.id"
+            >
+                <img
+                    :src="selected_user.profile_picture"
+                    alt="Profile Picture"
+                    class="object-cover w-full h-full"
+                />
             </div>
         </div>
         <div class="flex flex-col h-full">
             <div>
                 <label for="assignee" class="text-lg">Assignee:</label>
                 <multiselect
-                    v-model="selected_user"
+                    v-model="selected_users"
                     :options="users"
+                    :multiple="true"
                     :allow-empty="true"
                     placeholder="Select a user"
                     @select="selectAssignedUser"
@@ -122,8 +122,8 @@ const router = useRouter();
 const route = useRoute();
 const errors = ref([]);
 const task = ref([]);
-const user_id = ref(null);
-const selected_user = ref([]);
+const user_ids = ref(null);
+const selected_users = ref([]);
 const $localStorage = inject("$localStorage");
 
 const emit = defineEmits(['close-modal']);
@@ -143,10 +143,11 @@ const getTasks = () => {
             },
         })
         .then((response) => {
+            console.log(response.data);
             task.value = response.data;
             task.value.due_date = new Date(task.value.due_date);
-            user_id.value = response.data.user_id;
-            selected_user.value = response.data.user;
+            user_ids.value = response.data.users.map(user => user.id);
+            selected_users.value = response.data.users;
         });
 };
 
@@ -159,9 +160,7 @@ const getUsers = async function () {
             },
         })
         .then((response) => {
-            console.log(response.data);
             users.value = response.data;
-            console.log(response.data);
         })
         .catch((error) => {
             console.log(error);
@@ -169,12 +168,14 @@ const getUsers = async function () {
 };
 
 const selectAssignedUser = function (selectedOption, id) {
-    user_id.value = selectedOption.id;
+    user_ids.value = selected_users.value.map((user) => user.id); // Update the user_ids array with the updated selected_users array
 };
 
 const removeAssignedUser = function (removedOption, id) {
-    selected_user.value = [];
-    user_id.value = null;
+    selected_users.value = selected_users.value.filter(
+        (user) => user.id !== removedOption.id
+    );
+    user_ids.value = selected_users.value.map((user) => user.id);
 };
 
 const update = () => {
@@ -188,7 +189,7 @@ const update = () => {
                 title: task.value.title,
                 description: task.value.description,
                 due_date: task.value.due_date ? new Date(task.value.due_date).toDateString() : null ,
-                user_id: user_id.value,
+                user_ids: user_ids.value,
             },
             {
                 headers: {
@@ -197,7 +198,6 @@ const update = () => {
             }
         )
         .then((response) => {
-            console.log(response);
             // Check if the response contains success message
             if (response.data) {
                 // Store the token in local storage

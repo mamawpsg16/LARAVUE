@@ -94,10 +94,8 @@
                     <div>
                         <div class="flex justify-between">
                             <div>
-                                <label for="user" class="text-lg">User: </label>
-                                <span v-if="task.user">{{
-                                    task.user.username
-                                }}</span>
+                                <label for="user" class="text-lg">User/s: </label>
+                                <span v-if="task.users?.length">{{ getUsersAsString(task.users) }}</span>
                                 <span v-else>Not assigned yet!</span>
                             </div>
                             <select
@@ -307,6 +305,10 @@ const deleteTask = function (task_id) {
         }
     });
 };
+
+const getUsersAsString = function(users) {
+    return users.map(user => user.username).join(', ');
+}
 
 onMounted(() => {
     getTasks();

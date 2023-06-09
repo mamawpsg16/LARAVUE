@@ -1,10 +1,10 @@
 <template>
     <Navbar />
     <div class="container mx-auto px-4 mt-5">
-        <custom-button @button-click="handleClick"></custom-button>
+        <!-- <custom-button @button-click="handleClick"></custom-button>
         {{ message }}
         <custom-input v-model="input_value"></custom-input>
-        {{ input_value }}
+        {{ input_value }} -->
         <!-- <button @click="toggleModal">Open Modal</button> -->
         <!-- <BaseModal :modalClass="customModalClass" v-model="isModalOpen">
             <h2 class="text-2xl mb-4">Modal Title</h2>
