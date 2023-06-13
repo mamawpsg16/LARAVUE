@@ -114,7 +114,11 @@ class AuthenticationController extends Controller
 
     public function me()
     {
-        
+        // dd($request->header('Authorization'));
+        // dd(JWTAuth::parseToken()->authenticate());
+        // dd(JWTAuth::parseToken());
+        // dd(auth()->user());
+        // dd($this->guard()->user()->access_token);
         if ($this->guard()->user()->access_token) {
             return response()->json($this->guard()->user());
         }

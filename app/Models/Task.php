@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\User;
+use App\Models\TaskComment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -36,11 +37,15 @@ class Task extends Model
         }
     }
 
-    public function user()
+    public function users()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsToMany(User::class);
     }
 
+    public function comments()
+    {
+        return $this->hasMany(TaskComment::class)->orderByDesc('created_at');
+    }
     // protected static function booted()
     // {
     //     static::retrieved(function ($model) {

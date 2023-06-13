@@ -94,7 +94,7 @@
                                     notification.data.id
                                 )
                             "
-                            >Task Assigned : {{ notification.data.title }}
+                            >{{ notification.data?.context ? notification.data?.context : 'Task Assigned' }} : {{ notification.data.title }}
                         </a>
                     </div>
                     <div class="flex justify-center">

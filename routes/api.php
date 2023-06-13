@@ -6,6 +6,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ModuleController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SideBarController;
 use App\Http\Controllers\UserRoleController;
@@ -78,3 +79,8 @@ Route::get('/profile',[AuthenticationController::class,'me']);
 Route::post('/profile',[ProfileController::class,'update']);
 Route::post('/updateTaskStatus',[TaskController::class,'updateTaskStatus']);
 Route::post('/logout',[AuthenticationController::class, 'logout'])->name(' logout');
+
+/** COMMENT */
+Route::post('/comment',[CommentController::class,'store']);
+Route::put('/comment/{task_comment}',[CommentController::class,'update']);
+Route::delete('/task/{task_comment}',[CommentController::class,'destroy']);

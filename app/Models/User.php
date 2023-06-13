@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Task;
+use App\Models\TaskComment;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -62,9 +63,9 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    public function tasks(){
-        return $this->hasMany(Task::class);
-    }
+    // public function tasks(){
+    //     return $this->hasMany(Task::class);
+    // }
 
     public function getProfilePictureAttribute()
     {
@@ -78,6 +79,15 @@ class User extends Authenticatable implements JWTSubject
     public function roles()
     {
         return $this->belongsToMany(Role::class);
+    }
+
+    public function tasks(){
+        return $this->belongsToMany(Task::class,'task_user');
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(TaskComment::class);
     }
     // public function getProfilePictureUrl()
     // {

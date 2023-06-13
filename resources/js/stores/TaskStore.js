@@ -5,8 +5,6 @@ export const useTaskStore = defineStore('TaskStore', {
   state: () => ({
     created:null,
     updated:null,
-    success:null,
-    success:null,
   }),
 
  

@@ -118,6 +118,8 @@ import comment from "./Comments.vue";
 import PageNotFound from "../PageNotFound.vue";
 
 // const editor = ClassicEditor;
+// const $localStorage = inject("$localStorage");
+// const access_token = $localStorage.getItem("access_token");
 const editorData = ref("");
 const editorConfig = reactive({});
 const taskStore = useTaskStore();
@@ -177,6 +179,7 @@ watch(
 onMounted(() => {
     const initialTaskId = route.params.id;
     getTasks(initialTaskId);
+    // getUserDetails();
 });
 </script>
 

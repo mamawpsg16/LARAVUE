@@ -5,11 +5,15 @@ namespace App\Http\Controllers;
 use DateTime;
 use App\Models\Task;
 use App\Models\User;
+use App\Models\TaskComment;
+use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
 use App\Http\Requests\StoreTaskRequest;
 use App\Notifications\TaskNotification;
 use App\Http\Requests\UpdateTaskRequest;
+use Illuminate\Support\Facades\Validator;
 
 class TaskController extends Controller
 {
@@ -23,7 +27,7 @@ class TaskController extends Controller
         // dd($request->query('sort'));
         $user_id = Crypt::decryptString($request->query('user_id'));
         $user = User::where('id',$user_id)->first();
-        // dd($user->email);
+        $task_ids = $user->tasks()->pluck('task_id')->toArray();
         $query = Task::query();
 
         // Filtering logic
@@ -42,16 +46,17 @@ class TaskController extends Controller
             }
         }
         if($user->email != 'admin@admin.com'){
-            $query->where('user_id',$user->id);
+            $query->whereIn('id',$task_ids);
         }
         $tasks = $query->get();
-        $tasks->load('user');
+        $tasks->load(['users']);
         return response()->json($tasks, 200);
     }
 
 
     public function store(StoreTaskRequest $request)
     {
+        // dd($request->all());
         // $dueDate = $request->input('due_date');
         // $dateTime = new DateTime($dueDate);
         // $dateTime->modify('+1 day');
@@ -60,11 +65,14 @@ class TaskController extends Controller
             'title' => $request->input('title'),
             'description' => $request->input('description'),
             'due_date' => date('Y-m-d',strtotime($request->input('due_date'))),
-            'user_id'     => $request->input('user_id')
         ]);
-        if($request->input('user_id')){
-            $assignedUser = User::find($request->input('user_id'));
-            $assignedUser->notify(new TaskNotification($task));
+
+        if($request->input('user_ids')){
+            $task->users()->attach($request->input('user_ids'));
+            foreach($request->input('user_ids') as $user_id){
+                $assignedUser = User::find($user_id);
+                $assignedUser->notify(new TaskNotification($task));
+            }
         }
 
         return response()->json($task, 200);
@@ -78,29 +86,52 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
-        $task->load('user'); 
+        $task->load('users', 'comments.user');
+    
+        $groupedUsers = $task->users->groupBy('username')->toArray();
+        // dd($groupedUsers);
+        // $flatten =  Arr::flatten($groupedUsers);
+        // $uniqueUsers = collect($groupedUsers)->unique('id')->values()->all();
+        // dd($uniqueUsers);
+        $task->users = $groupedUsers;
+    
         return response()->json($task);
     }
+    
+    
+
 
 
     public function update(UpdateTaskRequest $request, Task $task)
     {
-        // dd($request->input('user_id'));
+        // dd($request->all());
+        // dd(array_intersect($request->input('user_ids'),$task->users->pluck('id')->toArray()));
+        $delete_user_ids = array_diff($task->users()->pluck('user_id')->toArray(),$request->input('user_ids'));
+        // $user_ids = array_values($shit);
+        $remove_users = DB::table('task_user')
+        ->where('task_id', $task->id)
+        ->whereIn('user_id',$delete_user_ids)
+        ->delete();
+
+        $new_users = array_diff($request->input('user_ids'), $task->users()->pluck('user_id')->toArray());
         // dd($request->input('user_id'),$task->user_id);
         // dd($request->input('user_id') && $task->user_id != $request->input('user_id'));
-        $old_user_id =  $task->user_id;
+        // $old_user_id =  $task->user_id;
         $task->update([
             'title' => $request->input('title'),
             'description' => $request->input('description'),
-            'due_date' => date('Y-m-d',strtotime($request->input('due_date'))),
-            'user_id'     => $request->input('user_id')
+            'due_date' => date('Y-m-d',strtotime($request->input('due_date')))
         ]);
 
+        // $task->users()->detach();
+
         // dd($request->input('user_id') && $old_user_id != $request->input('user_id'));
-        if($request->input('user_id') &&  $old_user_id != $request->input('user_id')){
-            $assignedUser = User::find( $request->input('user_id'));
-            $assignedUser->notify(new TaskNotification($task));
-    
+        if($request->input('user_ids') &&  $new_users){
+            $task->users()->attach($new_users);
+            foreach($new_users as $user_id){
+                $assignedUser = User::find($user_id);
+                $assignedUser->notify(new TaskNotification($task));
+            }
         }
 
         return response()->json($task);
@@ -109,6 +140,7 @@ class TaskController extends Controller
     public function destroy(Task $task)
     {
         $task->delete();
+        $task->users()->detach();
         return response()->json($task);
     }
 
@@ -117,4 +149,6 @@ class TaskController extends Controller
         $task = Task::where('id',$request->input('id'))->update(['status' => intval($request->input('status'))]);
         return response()->json($task);
     }
+
+   
 }

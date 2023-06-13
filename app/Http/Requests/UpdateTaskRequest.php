@@ -28,7 +28,7 @@ class UpdateTaskRequest extends FormRequest
             'title' => ['required', 'max:100',  Rule::unique('tasks')->ignore($this->task->id)],
             'description' => ['required', 'max:255'],
             'due_date' => 'required',
-            'user_id' => ['sometimes']
+            'user_ids' => ['sometimes','array']
         ];
     }
 }

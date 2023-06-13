@@ -1,4 +1,12 @@
 <template>
+    <BaseModal v-model="isModalOpen">
+        <template #modal-title>Edit Comment</template>
+        <EditComment
+            @comment="getEditedComment"
+            @close-modal="emitCloseModal"
+            :comment="edit_comment"
+        />
+    </BaseModal>
     <div class="mt-8">
         <div class="bg-white rounded-lg shadow-lg space-y-4 p-4">
             <h3 class="text-lg font-medium">Comments</h3>
@@ -15,14 +23,35 @@
                             />
                         </div>
                         <div class="flex flex-col">
-                            <h4 class="text-sm font-medium">
-                                {{ comment.user?.username }}
-                            </h4>
+                            <div class="flex items-center">
+                                <h4 class="text-sm font-medium">
+                                    {{ comment.user?.username }}
+                                </h4>
+                                <span class="text-xs text-gray-500 mx-2">
+                                    <!-- Added mx-2 class for spacing -->
+                                    {{
+                                        $date.humanReadable(comment.updated_at)
+                                    }}
+                                </span>
+                            </div>
                             <p class="text-sm">
                                 {{ comment.comment }}
                             </p>
-                            <p class="text-xs text-gray-500">
-                                {{ $date.humanReadable(comment.updated_at) }}
+                            <p v-if="comment.user_id == auth_user_id" class="space-x-3">
+                                <button
+                                    class="text-sm"
+                                    type="button"
+                                    @click="toggleModal(comment)"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    class="text-sm"
+                                    type="button"
+                                    @click="deleteComment(comment.id, task_id)"
+                                >
+                                    Delete
+                                </button>
                             </p>
                         </div>
                     </div>
@@ -42,6 +71,9 @@
                             id="comment"
                             placeholder="Write your comment here..."
                         ></textarea>
+                        <span v-if="errors.comment" class="text-red-500">{{
+                            errors.comment[0]
+                        }}</span>
                     </div>
                     <div class="flex justify-end">
                         <button
@@ -61,15 +93,94 @@
 
 <script setup>
 /** IMPORTS */
-import { ref } from "vue";
+import { ref, inject, onMounted } from "vue";
 import axios from "axios";
 import { showCustomToast } from "../../Utils/toast";
 import { useTaskStore } from "../../stores/TaskStore";
+import BaseModal from "../../components/BaseModal.vue";
+import EditComment from "./EditComment.vue";
+import Swal from "../../Utils/swal.js";
+// import EditComment from './EditComment.vue'
 /** DATA */
 const comment = ref(null);
+const auth_user_id = ref(null); 
+const edit_comment = ref(null);
+// const isNotOnEdit = ref(true)
 const defaultImage =
     "http://laravue-practical.local/storage/defaults/no-profile.png";
 const taskStore = useTaskStore();
+const isModalOpen = ref(false);
+const errors = ref([]);
+const $localStorage = inject("$localStorage");
+const access_token = $localStorage.getItem("access_token");
+/** METHODS */
+const toggleModal = function (comment = null) {
+    edit_comment.value = comment;
+    isModalOpen.value = !isModalOpen.value;
+};
+
+const emitCloseModal = (data) => {
+    isModalOpen.value = data;
+};
+
+const getUserDetails = function () {
+    // console.log(localStorage.getItem('access_token'));
+    // return false;
+    let access_token = $localStorage.getItem("access_token");
+    axios
+        .get("/api/profile", {
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+            },
+        })
+        .then((response) => {
+            auth_user_id.value = response.data.id;
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+};
+
+const getEditedComment = (data) => {
+    let commentIndex = props.comments.findIndex(
+        (comment) => data.comment_id == comment.id
+    );
+    if (commentIndex !== -1) {
+        props.comments[commentIndex].comment = data.comment;
+    }
+};
+
+const deleteComment = function (comment_id, task_id) {
+    Swal("Delete Comment!", "Are you sure?", "warning", "Yes", {
+        showCancelButton: true,
+        cancelButtonText: "No",
+        customClass: {
+            confirmButton: "btn-success",
+            cancelButton: "btn-danger",
+        },
+    }).then((result) => {
+        if (result.value) {
+            axios
+                .delete("/api/task/" + comment_id, {
+                    headers: {
+                        Authorization: `Bearer ${access_token}`,
+                    },
+                })
+                .then((response) => {
+                    const index = props.comments.findIndex(
+                        (comment) => comment.id === comment_id
+                    );
+                    if (index !== -1) {
+                        console.log(index, "INDEX");
+                        props.comments.splice(index, 1);
+                        showCustomToast("success", "Comment Deleted!");
+                    }
+                })
+                .catch((error) => {});
+        }
+    });
+};
+
 /** PROPS */
 const props = defineProps({
     comments: {
@@ -86,7 +197,7 @@ const storeComment = function (e) {
 
     axios
         .post(
-            "/api/task/comment",
+            "/api/comment",
             {
                 task_id: props.task_id,
                 comment: comment.value,
@@ -108,10 +219,27 @@ const storeComment = function (e) {
             taskStore.$state.updated = Math.random() * 50000;
             console.log(response);
         })
-        .catch((response) => {
-            console.log(response);
+        .catch((error) => {
+            if (error.response?.status === 422) {
+                // Handle validation errors
+                // if (error.response.data.errors.not_exists?.length) {
+                //     showCustomToast(
+                //         "error",
+                //         error.response.data.errors.not_exists,
+                //         {}
+                //     );
+                // }
+
+                errors.value = error.response.data.errors;
+            } else {
+                // Handle other errors
+                console.log(error);
+            }
         });
 };
+onMounted(() => {
+    getUserDetails();
+});
 </script>
 
 <style lang="scss" scoped></style>

@@ -16,9 +16,10 @@ class TaskNotification extends Notification
      *
      * @return void
      */
-    public function __construct($task)
+    public function __construct($task, $context = null)
     {
         $this->task = $task;
+        $this->context = $context;
     }
 
     /**
@@ -56,6 +57,7 @@ class TaskNotification extends Notification
     public function toArray($notifiable)
     {
     return [
+            'context' => $this->context,
             'id' => $this->task->id,
             'title' => $this->task->title,
             'description' => $this->task->description,
