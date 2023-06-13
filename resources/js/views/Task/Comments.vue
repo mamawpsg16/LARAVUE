@@ -37,7 +37,10 @@
                             <p class="text-sm">
                                 {{ comment.comment }}
                             </p>
-                            <p v-if="comment.user_id == auth_user_id" class="space-x-3">
+                            <p
+                                v-if="comment.user_id == auth_user_id"
+                                class="space-x-3"
+                            >
                                 <button
                                     class="text-sm"
                                     type="button"
@@ -66,11 +69,16 @@
                         >
                         <textarea
                             v-model="comment"
-                            class="form-textarea mt-1"
+                            class="form-textarea mt-1 text-blue-500 p-2"
                             rows="3"
                             id="comment"
                             placeholder="Write your comment here..."
+                            @input="handleMentionUser"
                         ></textarea>
+                        <ul v-if="showDropdown" class="cursor-pointer">
+                            <li v-for="username in usernames" :key="username" @click="insertMention(username)">@{{ username.username }}</li>
+                        </ul>
+                        <div v-if="formattedComment" class="formatted-comment text-blue-500" v-html="formattedComment"></div>
                         <span v-if="errors.comment" class="text-red-500">{{
                             errors.comment[0]
                         }}</span>
@@ -103,9 +111,12 @@ import Swal from "../../Utils/swal.js";
 // import EditComment from './EditComment.vue'
 /** DATA */
 const comment = ref(null);
-const auth_user_id = ref(null); 
+const auth_user_id = ref(null);
 const edit_comment = ref(null);
-// const isNotOnEdit = ref(true)
+const usernames = ref([]);
+const showDropdown = ref(false);
+const formattedComment = ref(comment.value);
+const mentionedUsers = ref([])
 const defaultImage =
     "http://laravue-practical.local/storage/defaults/no-profile.png";
 const taskStore = useTaskStore();
@@ -113,7 +124,18 @@ const isModalOpen = ref(false);
 const errors = ref([]);
 const $localStorage = inject("$localStorage");
 const access_token = $localStorage.getItem("access_token");
-/** METHODS */
+
+/** PROPS */
+const props = defineProps({
+    comments: {
+        type: Array,
+    },
+    task_id: {
+        type: Number,
+    },
+});
+
+/** METHODS/FUNCTIONS */
 const toggleModal = function (comment = null) {
     edit_comment.value = comment;
     isModalOpen.value = !isModalOpen.value;
@@ -141,6 +163,41 @@ const getUserDetails = function () {
         });
 };
 
+const handleMentionUser = function(){
+    // console.log('wtf');
+    const mentionRegex = /@(\w+)/g;
+    const matches = comment.value.match(mentionRegex);
+    console.log(matches);
+    if (matches && matches.length > 0) {
+        console.log(matches,matches[matches.length - 1],'AYO')
+        const lastMatch = matches[matches.length - 1];
+        const username = lastMatch.substr(1); // Remove the "@" symbol
+        fetchMatchUsers(username);
+    } else {
+        showDropdown.value = false;
+    }
+   
+};
+
+const fetchMatchUsers = function(match_string){
+    axios.post('/api/getMatchedUsers',{ user_match : match_string, 'task_id' : props.task_id }, { headers:{
+        'Authorization': `Bearer ${access_token}` 
+    }}).then((response) => {
+        console.log(response);
+        usernames.value = response.data;
+        showDropdown.value = true;
+    }).catch((error) => {
+        console.log(error);
+        showDropdown.value = false;
+    })
+};
+
+const insertMention = function(username) {
+      const mention = `@${username.username} `;
+      comment.value = comment.value.replace(/@(\w+)$/, mention);
+      mentionedUsers.value.push(username.username);
+      showDropdown.value = false;
+};
 const getEditedComment = (data) => {
     let commentIndex = props.comments.findIndex(
         (comment) => data.comment_id == comment.id
@@ -181,17 +238,6 @@ const deleteComment = function (comment_id, task_id) {
     });
 };
 
-/** PROPS */
-const props = defineProps({
-    comments: {
-        type: Array,
-    },
-    task_id: {
-        type: Number,
-    },
-});
-
-/** METHODS/FUNCTIONS */
 const storeComment = function (e) {
     e.preventDefault();
 
@@ -202,6 +248,7 @@ const storeComment = function (e) {
                 task_id: props.task_id,
                 comment: comment.value,
                 user_id: localStorage.getItem("user_id"),
+                mentioned_usernames: mentionedUsers.value
             },
             {
                 headers: {
@@ -217,6 +264,8 @@ const storeComment = function (e) {
                 // position: 'bottom-right',
             });
             taskStore.$state.updated = Math.random() * 50000;
+            mentionedUsers.value = [];
+            comment.value = null;
             console.log(response);
         })
         .catch((error) => {

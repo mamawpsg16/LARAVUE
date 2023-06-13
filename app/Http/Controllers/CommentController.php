@@ -14,7 +14,7 @@ class CommentController extends Controller
 {
     
     public function store(Request $request){
-        // dd($request->input('task_id'));
+        // dd($request->all());
         $validator = Validator::make($request->only(['user_id', 'comment', 'task_id']), [
             'user_id' => 'required',
             'comment' => 'required',
@@ -34,10 +34,21 @@ class CommentController extends Controller
         ]);
         $user = User::find($user_id);
         $auth_user_id = [intval($user_id)];
-        $task_assigned_user_ids = Task::find($request->input('task_id'))->users()->pluck('user_id')->toArray();
+        $task_assigned_user_ids = Task::find($request->input('task_id'))->users()->wherePivot('notif_enable', 1)->pluck('user_id')->toArray();
+        // dd($task_assigned_user_ids,$task->users()->wherePivot('notif_enable', 1)->pluck('user_id'));
         $task = Task::find($request->input('task_id'));
         $others_id = array_diff($task_assigned_user_ids, $auth_user_id);
-        if($others_id){
+        $mentionedUsernames = $request->input('mentioned_usernames');
+        // dd($mentionedUsernames, empty($mentionedUsernames));
+        if($mentionedUsernames){
+            $users = User::whereIn('username', $mentionedUsernames)->get();
+            // dd($users);
+            foreach ($users as $collab_user) {
+                $collab_user->notify(new TaskNotification($task, $user->username . ' mentioned you'));
+            }
+        }
+        
+        if($others_id && count($mentionedUsernames) === 0){
             // Task::find($request->input('task_id'))->users()->attach($others_id);
             foreach($others_id as $user_id){
                 $assignedUser = User::find($user_id);

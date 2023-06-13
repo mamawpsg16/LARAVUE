@@ -23,36 +23,41 @@ class TaskController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
-    {
-        // dd($request->query('sort'));
-        $user_id = Crypt::decryptString($request->query('user_id'));
-        $user = User::where('id',$user_id)->first();
-        $task_ids = $user->tasks()->pluck('task_id')->toArray();
-        $query = Task::query();
+{
+    // Decrypt the user_id from the request
+    $user_id = Crypt::decryptString($request->query('user_id'));
+    
+    // Retrieve the user based on the decrypted user_id
+    $user = User::where('id', $user_id)->first();
+    
+    // Retrieve tasks with users and their notif_enable values for the specified user
+    $tasks = Task::with(['users' => function ($query) use ($user_id) {
+        $query->where('user_id', $user_id)->withPivot('notif_enable');
+    }])->get();
 
-        // Filtering logic
-        // $filter = $request->query('filter');
-        // if($filter != 'all'){
-        //     $query->where('status', $filter );
-        // }
-        
-        // // Sorting logic
-        $sortBy = $request->query('sortBy');
-        if($sortBy != 'default'){
-            if ($sortBy === 'due_date') {
-                $query->orderBy('due_date',$request->query('sort'));
-            } elseif ($sortBy === 'title') {
-                $query->orderBy('title',$request->query('sort'));
-            }
+    // Iterate over each task and assign the notif_enable value for the specified user
+    $tasks->each(function ($task) use ($user_id) {
+        //  searches for the first user in the collection where the user_id in the pivot table matches the specified $user_id.
+        $task->notif_enable = $task->users->firstWhere('pivot.user_id', $user_id)->pivot->notif_enable ?? null;
+    });
+
+    // Sorting logic
+    $sortBy = $request->query('sortBy');
+    if ($sortBy != 'default') {
+        if ($sortBy === 'due_date') {
+            // Sort tasks by due_date
+            $tasks = $tasks->sortBy('due_date', $request->query('sort'));
+        } elseif ($sortBy === 'title') {
+            // Sort tasks by title
+            $tasks = $tasks->sortBy('title', $request->query('sort'));
         }
-        if($user->email != 'admin@admin.com'){
-            $query->whereIn('id',$task_ids);
-        }
-        $tasks = $query->get();
-        $tasks->load(['users']);
-        return response()->json($tasks, 200);
     }
 
+    // Return the tasks as a JSON response
+    return response()->json($tasks, 200);
+}
+
+    
 
     public function store(StoreTaskRequest $request)
     {
@@ -128,6 +133,7 @@ class TaskController extends Controller
         // dd($request->input('user_id') && $old_user_id != $request->input('user_id'));
         if($request->input('user_ids') &&  $new_users){
             $task->users()->attach($new_users);
+            // dd($task->users()->wherePivot('notif_enable', 1)->pluck('user_id'));
             foreach($new_users as $user_id){
                 $assignedUser = User::find($user_id);
                 $assignedUser->notify(new TaskNotification($task));

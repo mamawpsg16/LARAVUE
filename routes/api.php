@@ -50,10 +50,13 @@ Route::post('/login',[AuthenticationController::class, 'authenticate'])->name(' 
 //     });
    
 // });
+
+/** NOTIFICATIONS */
 Route::get('notifications',[NotificationController::class,'index']);
 Route::get('unread-notifications',[NotificationController::class,'unreadNotifications']);
 Route::post('markAsRead',[NotificationController::class,'markAsRead']);
 Route::post('markAllAsRead',[NotificationController::class,'markAllAsRead']);
+Route::post('updateNotification',[NotificationController::class,'updateNotification']);
 
 Route::get('getModules',[SideBarController::class,'index']);
 Route::get('role-access-data',[RoleAccessController::class,'getRoleAccessDetails']);
@@ -73,6 +76,7 @@ Route::apiResources([
 Route::get('/login/{provider}', [SocialController::class,'redirectToProvider']);
 Route::get('/login/{provider}/callback', [SocialController::class,'handleProviderCallback']);
 Route::get('/users',[UserController::class,'getUsers']);
+Route::post('/getMatchedUsers',[UserController::class,'getMatchedUsers']);
 Route::get('/getRoles',[RoleController::class,'getRoles']);
 Route::get('/dashboard',DashboardController::class);
 Route::get('/profile',[AuthenticationController::class,'me']);

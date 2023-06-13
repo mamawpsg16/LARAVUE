@@ -92,6 +92,12 @@
                     class="flex flex-col justify-between p-4 border rounded-md"
                 >
                     <div>
+                        <div class="flex justify-end items-center">
+                            <label  :for="`notification-${task.id}`">
+                                Enable Notification :
+                                <input type="checkbox" :id="`notification-${task.id}`" :checked="task.notif_enable === 1" @click="toggleTaskNotification($event,task.id)">
+                            </label>
+                        </div>
                         <div class="flex justify-between">
                             <div>
                                 <label for="user" class="text-lg">User/s: </label>
@@ -201,6 +207,28 @@ const access_token = localStorage.getItem("bearer_token");
 const isModalOpen = ref(false);
 
 const taskState = useTaskStore()
+/** METHODS */
+
+const toggleTaskNotification = function(e,task_id)
+{
+     const checkbox = e.target;
+     if (checkbox.checked) {
+        updateTasknotification(task_id,1)
+    } else {
+        updateTasknotification(task_id,0)
+    }
+    console.log('NOTIF',checkbox);
+}
+const updateTasknotification = function(task_id,value){
+    const access_token = $localStorage.getItem("access_token");
+    console.log(access_token);
+    axios.post('/api/updateNotification',{'task_id':task_id , value: value}, {headers: { 'Authorization': `Bearer ${access_token}`}})
+    .then((response) => {
+
+    }).catch((error) =>{
+        console.log(error);
+    })
+}
 const toggleModal = function () {
     isModalOpen.value = !isModalOpen.value;
 };
