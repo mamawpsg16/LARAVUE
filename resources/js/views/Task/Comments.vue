@@ -42,7 +42,7 @@
                                     class="text-sm"
                                     type="button"
                                     @click="toggleModal(comment)"
-                                >a
+                                >
                                     Edit
                                 </button>
                                 <button
