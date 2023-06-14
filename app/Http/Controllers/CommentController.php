@@ -60,7 +60,14 @@ class CommentController extends Controller
     }
 
     public function update(Request $request, TaskComment $task_comment){
-        // dd($request, $task_comment);
+        $validator = Validator::make($request->only([ 'comment']), [
+            'comment' => 'required'
+        ]);
+
+        if($validator->fails()){
+            return response()->json(['errors' => $validator->errors()],422);
+        }
+
         $task_comment->update(['comment' => $request->comment]);
 
         return response()->json($task_comment);

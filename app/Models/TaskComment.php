@@ -21,4 +21,16 @@ class TaskComment extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+     // Relationship with parent comment
+     public function parentComment()
+     {
+         return $this->belongsTo(TaskComment::class, 'parent_id');
+     }
+ 
+     // Relationship with child comments (replies)
+     public function childComments()
+     {
+         return $this->hasMany(TaskComment::class, 'parent_id');
+     }
 }

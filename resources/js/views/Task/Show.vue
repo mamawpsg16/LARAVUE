@@ -137,24 +137,22 @@ const route = useRoute();
 const router = useRouter();
 const task_exists = ref(true);
 const task = ref({});
-const getTasks = (task_id) => {
-    const access_token = localStorage.getItem("bearer_token");
-    // const task_id = route.params.id;
-    axios
-        .get(`/api/tasks/${task_id}`, {
+const getTasks = async (task_id) => {
+    try {
+        const access_token = localStorage.getItem("bearer_token");
+        const response = await axios.get(`/api/tasks/${task_id}`, {
             headers: {
                 Authorization: `Bearer ${access_token}`,
             },
-        })
-        .then((response) => {
-            task.value = response.data;
-        })
-        .catch((error) => {
-            if (error.response.status == 404) {
-                task_exists.value = false;
-            }
         });
+        task.value = response.data;
+    } catch (error) {
+        if (error.response && error.response.status == 404) {
+            task_exists.value = false;
+        }
+    }
 };
+
 
 const getUsersAsString = function (users) {
     return users.map((user) => user.username).join(", ");

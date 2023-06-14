@@ -23,41 +23,46 @@ class TaskController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
-{
-    // Decrypt the user_id from the request
-    $user_id = Crypt::decryptString($request->query('user_id'));
-    
-    // Retrieve the user based on the decrypted user_id
-    $user = User::where('id', $user_id)->first();
-    
-    // Retrieve tasks with users and their notif_enable values for the specified user
-    $tasks = Task::with(['users' => function ($query) use ($user_id) {
-        $query->where('user_id', $user_id)->withPivot('notif_enable');
-    }])->get();
+    {
+        $user_id = Crypt::decryptString($request->query('user_id'));
+        // Retrieve the user based on the decrypted user_id
+        $user = User::findOrFail($user_id);
+        // Get the task_id from tasks of the user authenticate
+        $task_ids = $user->tasks()->pluck('task_id')->toArray();
 
-    // Iterate over each task and assign the notif_enable value for the specified user
-    $tasks->each(function ($task) use ($user_id) {
-        //  searches for the first user in the collection where the user_id in the pivot table matches the specified $user_id.
-        $task->notif_enable = $task->users->firstWhere('pivot.user_id', $user_id)->pivot->notif_enable ?? null;
-    });
+        // Retrieve tasks with users and their notif_enable values for the specified user
+        $tasks = Task::with(['users' => function ($query) use ($user_id) {
+            $query->where('user_id', $user_id)->withPivot('notif_enable');
+        }]);
 
-    // Sorting logic
-    $sortBy = $request->query('sortBy');
-    if ($sortBy != 'default') {
-        if ($sortBy === 'due_date') {
-            // Sort tasks by due_date
-            $tasks = $tasks->sortBy('due_date', $request->query('sort'));
-        } elseif ($sortBy === 'title') {
-            // Sort tasks by title
-            $tasks = $tasks->sortBy('title', $request->query('sort'));
+        // Filter tasks based on user's email/role 
+        if ($user->email !== 'admin@admin.com') {
+            $tasks->whereIn('id', $task_ids);
         }
+
+        $sortBy = $request->query('sortBy');
+        if ($sortBy !== 'default') {
+            // Sorting logic
+            $sortField = ($sortBy === 'due_date') ? 'due_date' : 'title';
+            $sortDirection = $request->query('sort', 'asc');
+            $tasks->orderBy($sortField, $sortDirection);
+        }
+
+        // Get the tasks and assign notif_enable values
+        $tasks = $tasks->get()->each(function ($task) use ($user_id) {
+            $task->notif_enable = $task->users->firstWhere('pivot.user_id', $user_id)->pivot->notif_enable ?? null;
+        });
+
+        // Eager load users again after modifying notif_enable
+        $tasks->load(['users']);
+
+        // Return the tasks as a JSON response
+        return response()->json($tasks, 200);
     }
 
-    // Return the tasks as a JSON response
-    return response()->json($tasks, 200);
-}
 
-    
+
+
 
     public function store(StoreTaskRequest $request)
     {
@@ -69,12 +74,12 @@ class TaskController extends Controller
         $task = Task::create([
             'title' => $request->input('title'),
             'description' => $request->input('description'),
-            'due_date' => date('Y-m-d',strtotime($request->input('due_date'))),
+            'due_date' => date('Y-m-d', strtotime($request->input('due_date'))),
         ]);
 
-        if($request->input('user_ids')){
+        if ($request->input('user_ids')) {
             $task->users()->attach($request->input('user_ids'));
-            foreach($request->input('user_ids') as $user_id){
+            foreach ($request->input('user_ids') as $user_id) {
                 $assignedUser = User::find($user_id);
                 $assignedUser->notify(new TaskNotification($task));
             }
@@ -92,18 +97,18 @@ class TaskController extends Controller
     public function show(Task $task)
     {
         $task->load('users', 'comments.user');
-    
+
         $groupedUsers = $task->users->groupBy('username')->toArray();
         // dd($groupedUsers);
         // $flatten =  Arr::flatten($groupedUsers);
         // $uniqueUsers = collect($groupedUsers)->unique('id')->values()->all();
         // dd($uniqueUsers);
         $task->users = $groupedUsers;
-    
+
         return response()->json($task);
     }
-    
-    
+
+
 
 
 
@@ -111,12 +116,12 @@ class TaskController extends Controller
     {
         // dd($request->all());
         // dd(array_intersect($request->input('user_ids'),$task->users->pluck('id')->toArray()));
-        $delete_user_ids = array_diff($task->users()->pluck('user_id')->toArray(),$request->input('user_ids'));
+        $delete_user_ids = array_diff($task->users()->pluck('user_id')->toArray(), $request->input('user_ids'));
         // $user_ids = array_values($shit);
         $remove_users = DB::table('task_user')
-        ->where('task_id', $task->id)
-        ->whereIn('user_id',$delete_user_ids)
-        ->delete();
+            ->where('task_id', $task->id)
+            ->whereIn('user_id', $delete_user_ids)
+            ->delete();
 
         $new_users = array_diff($request->input('user_ids'), $task->users()->pluck('user_id')->toArray());
         // dd($request->input('user_id'),$task->user_id);
@@ -125,16 +130,16 @@ class TaskController extends Controller
         $task->update([
             'title' => $request->input('title'),
             'description' => $request->input('description'),
-            'due_date' => date('Y-m-d',strtotime($request->input('due_date')))
+            'due_date' => date('Y-m-d', strtotime($request->input('due_date')))
         ]);
 
         // $task->users()->detach();
 
         // dd($request->input('user_id') && $old_user_id != $request->input('user_id'));
-        if($request->input('user_ids') &&  $new_users){
+        if ($request->input('user_ids') &&  $new_users) {
             $task->users()->attach($new_users);
             // dd($task->users()->wherePivot('notif_enable', 1)->pluck('user_id'));
-            foreach($new_users as $user_id){
+            foreach ($new_users as $user_id) {
                 $assignedUser = User::find($user_id);
                 $assignedUser->notify(new TaskNotification($task));
             }
@@ -150,11 +155,10 @@ class TaskController extends Controller
         return response()->json($task);
     }
 
-    public function updateTaskStatus(Request $request){
-        
-        $task = Task::where('id',$request->input('id'))->update(['status' => intval($request->input('status'))]);
+    public function updateTaskStatus(Request $request)
+    {
+
+        $task = Task::where('id', $request->input('id'))->update(['status' => intval($request->input('status'))]);
         return response()->json($task);
     }
-
-   
 }

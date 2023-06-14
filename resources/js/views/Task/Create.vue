@@ -214,9 +214,6 @@ const store = () => {
             // Handle request error
             if (error.response?.status === 422) {
                 // Handle validation errors
-                console.log("ERROR");
-                console.log(error.response.data.errors);
-                console.log("SHIT");
                 if (error.response.data.errors.not_exists?.length) {
                     showCustomToast(
                         "error",
@@ -224,7 +221,6 @@ const store = () => {
                         {}
                     );
                 }
-                console.log(error.response.data.errors);
                 errors.value = error.response.data.errors;
             } else {
                 // Handle other errors

@@ -78,7 +78,6 @@
                         <ul v-if="showDropdown" class="cursor-pointer">
                             <li v-for="username in usernames" :key="username" @click="insertMention(username)">@{{ username.username }}</li>
                         </ul>
-                        <div v-if="formattedComment" class="formatted-comment text-blue-500" v-html="formattedComment"></div>
                         <span v-if="errors.comment" class="text-red-500">{{
                             errors.comment[0]
                         }}</span>

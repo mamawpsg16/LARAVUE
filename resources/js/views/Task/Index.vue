@@ -1,8 +1,13 @@
 <template>
     <Navbar />
+    
     <BaseModal v-model="isModalOpen" >
         <template #modal-title>New Task</template>
         <create></create>
+    </BaseModal>
+    <BaseModal v-model="isPriotizationModalOpen" >
+        <template #modal-title>Prioritize Task</template>
+        <Prioritization :tasks="tasks"/>
     </BaseModal>
     <div class="p-4">
         <h1 class="text-2xl font-bold text-center">TASKS</h1>
@@ -64,20 +69,28 @@
                     />
                 </svg>
             </router-link> -->
-            <button
-                @click="toggleModal"
-                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-md"
-            >
-                <svg
-                    class="h-4"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 448 512"
+            <div class="flex items-center justify-center space-x-2">
+                <button
+                    @click="togglePrioritizationModal"
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-md"
                 >
-                    <path
-                        d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"
-                    />
-                </svg>
-            </button>
+                <i class="fa-solid fa-list-check"></i>
+                </button>
+                <button
+                    @click="toggleModal"
+                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-md"
+                >
+                    <svg
+                        class="h-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 448 512"
+                    >
+                        <path
+                            d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32V224H48c-17.7 0-32 14.3-32 32s14.3 32 32 32H192V432c0 17.7 14.3 32 32 32s32-14.3 32-32V288H400c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"
+                        />
+                    </svg>
+                </button>
+            </div>
         </div>
         <div class="flex justify-end">
             <p class="text-lg">Count: {{ tasks.length }}</p>
@@ -193,6 +206,7 @@ import Multiselect from "vue-multiselect";
 import BaseModal from "../../components/BaseModal.vue";
 import Create from './Create.vue';
 import { useTaskStore } from '../../stores/TaskStore.js'
+import Prioritization from './Priotization.vue';
 
 const customModalClass = ref("w-full xs:w-3/4 sm:w-3/4 md:w-2/3 lg:w-6/12");
 const router = useRouter();
@@ -205,6 +219,7 @@ const $localStorage = inject("$localStorage");
 const all_tasks = ref([]);
 const access_token = localStorage.getItem("bearer_token");
 const isModalOpen = ref(false);
+const isPriotizationModalOpen = ref(false);
 
 const taskState = useTaskStore()
 /** METHODS */
@@ -224,13 +239,16 @@ const updateTasknotification = function(task_id,value){
     console.log(access_token);
     axios.post('/api/updateNotification',{'task_id':task_id , value: value}, {headers: { 'Authorization': `Bearer ${access_token}`}})
     .then((response) => {
-
+        showCustomToast("success", "Task Notification Updated!");
     }).catch((error) =>{
         console.log(error);
     })
 }
 const toggleModal = function () {
     isModalOpen.value = !isModalOpen.value;
+};
+const togglePrioritizationModal = function () {
+    isPriotizationModalOpen.value = !isPriotizationModalOpen.value;
 };
 const getTasks = () => {
     const access_token = $localStorage.getItem("bearer_token");
