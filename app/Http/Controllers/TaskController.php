@@ -27,38 +27,47 @@ class TaskController extends Controller
         $user_id = Crypt::decryptString($request->query('user_id'));
         // Retrieve the user based on the decrypted user_id
         $user = User::findOrFail($user_id);
-        // Get the task_id from tasks of the user authenticate
+  
+        // Get the task_id from tasks of the authenticated user
         $task_ids = $user->tasks()->pluck('task_id')->toArray();
-
+        
         // Retrieve tasks with users and their notif_enable values for the specified user
         $tasks = Task::with(['users' => function ($query) use ($user_id) {
-            $query->where('user_id', $user_id)->withPivot('notif_enable');
+            $query->where('user_id', $user_id)
+                  ->withPivot('notif_enable', 'order'); // Include the 'order' column from the pivot table
         }]);
-
-        // Filter tasks based on user's email/role 
+    
+        // Filter tasks based on user's email/role
         if ($user->email !== 'admin@admin.com') {
             $tasks->whereIn('id', $task_ids);
         }
-
+        
         $sortBy = $request->query('sortBy');
+        $sortDirection = $request->query('sort', 'asc');
+        // dd($sortBy, $sortDirection);
         if ($sortBy !== 'default') {
             // Sorting logic
             $sortField = ($sortBy === 'due_date') ? 'due_date' : 'title';
-            $sortDirection = $request->query('sort', 'asc');
             $tasks->orderBy($sortField, $sortDirection);
+        } else {
+            $tasks->orderBy('order', $sortDirection);
         }
+        // $tasks->whereNotIn('status', [2, 3]);
 
         // Get the tasks and assign notif_enable values
         $tasks = $tasks->get()->each(function ($task) use ($user_id) {
             $task->notif_enable = $task->users->firstWhere('pivot.user_id', $user_id)->pivot->notif_enable ?? null;
+            $task->order = $task->users->firstWhere('pivot.user_id', $user_id)->pivot->order ?? null;
         });
-
+    
         // Eager load users again after modifying notif_enable
         $tasks->load(['users']);
-
+    
         // Return the tasks as a JSON response
         return response()->json($tasks, 200);
     }
+    
+
 
 
 
@@ -157,8 +166,24 @@ class TaskController extends Controller
 
     public function updateTaskStatus(Request $request)
     {
-
         $task = Task::where('id', $request->input('id'))->update(['status' => intval($request->input('status'))]);
         return response()->json($task);
+    }
+
+    public function updateTaskOrder(Request $request)
+    {
+        // $user = auth()->user();
+        
+        // Retrieve the tasks associated with the user
+        $tasks = $request->tasks;
+        // dd($tasks);
+        
+        $user = auth()->user();
+        // Update the order for each task
+        foreach ($tasks as $key => $task) {
+         Task::where('id',$task['id'])->update(['order' => $key]);
+        }
+
+        return response()->json($tasks);
     }
 }

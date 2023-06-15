@@ -82,7 +82,9 @@ class User extends Authenticatable implements JWTSubject
     }
 
     public function tasks(){
-        return $this->belongsToMany(Task::class,'task_user')->withPivot('notif_enable');
+        return $this->belongsToMany(Task::class,'task_user')->withPivot('notif_enable','order')
+        ->as('task_user')
+        ->orderBy('task_user.order', 'desc');;
     }
 
     // public function comments()

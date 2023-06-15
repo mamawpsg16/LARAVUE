@@ -49,8 +49,8 @@
                         id="sort"
                         class="px-2 py-1 border rounded-md"
                     >
-                        <option value="desc">Descending</option>
                         <option value="asc">Ascending</option>
+                        <option value="desc">Descending</option>
                     </select>
                 </div>
             </div>
@@ -214,7 +214,7 @@ const users = ref();
 const tasks = ref([]);
 const filter = ref("all"); // Default filter option
 const sortBy = ref("default"); // Default sort option
-const sort = ref("desc"); // Default sort option
+const sort = ref("asc"); // Default sort option
 const $localStorage = inject("$localStorage");
 const all_tasks = ref([]);
 const access_token = localStorage.getItem("bearer_token");

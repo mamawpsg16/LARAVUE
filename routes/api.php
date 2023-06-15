@@ -82,6 +82,7 @@ Route::get('/dashboard',DashboardController::class);
 Route::get('/profile',[AuthenticationController::class,'me']);
 Route::post('/profile',[ProfileController::class,'update']);
 Route::post('/updateTaskStatus',[TaskController::class,'updateTaskStatus']);
+Route::post('/updateTaskOrder',[TaskController::class,'updateTaskOrder']);
 Route::post('/logout',[AuthenticationController::class, 'logout'])->name(' logout');
 
 /** COMMENT */
